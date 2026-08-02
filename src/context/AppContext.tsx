@@ -38,7 +38,7 @@ interface AppContextType {
     subscription: 'Free' | 'Premium';
     verification: VerificationStatus;
   };
-  upgradeSubscription: () => Promise<string>; // Returns checkout URL
+  upgradeSubscription: (planId?: string, amount?: number) => Promise<{ transactionId: string; checkoutUrl: string }>;
   cancelActiveSubscription: () => Promise<void>;
   setVerificationField: (field: keyof VerificationStatus, value: boolean) => void;
   
@@ -128,7 +128,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     r2Bytes: 42000000 // 42MB
   });
 
-  // Load from local storage on mount
+  // Load from local storage and API on mount
   useEffect(() => {
     if (typeof window !== 'undefined') {
       // Theme
@@ -140,9 +140,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         document.documentElement.classList.add('dark');
       }
 
-      // User profile
+      // User profile (fallback to localStorage, then sync with D1)
       const storedProfile = localStorage.getItem('ls_user_profile');
       if (storedProfile) setUserProfile(JSON.parse(storedProfile));
+
+      const loadProfile = async () => {
+        try {
+          const res = await fetch("/api/user/profile");
+          if (res.ok) {
+            const data = await res.json();
+            const syncedProfile = {
+              name: data.name || "Alex",
+              age: data.age || 30,
+              gender: data.gender || "Male",
+              location: data.location || "Oslo, Norway",
+              subscription: data.subscription || "Free",
+              verification: { email: true, phone: false, photo: false, id: false }
+            };
+            setUserProfile(syncedProfile);
+            localStorage.setItem('ls_user_profile', JSON.stringify(syncedProfile));
+          }
+        } catch (e) {
+          console.error("Failed to load user profile from D1:", e);
+        }
+      };
+      loadProfile();
 
       // Active provider
       const storedProvider = localStorage.getItem('ls_active_payment_provider') as PaymentProviderName | null;
@@ -168,11 +190,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Fetch invoices for active payment provider
   useEffect(() => {
     const loadInvoices = async () => {
-      const history = await paymentService.getInvoiceHistory('user_123', activePaymentProvider);
-      setInvoices(history);
+      try {
+        const res = await fetch("/api/paddle/invoices");
+        if (res.ok) {
+          const data = await res.json();
+          setInvoices(data.invoices || []);
+        } else {
+          const history = await paymentService.getInvoiceHistory('user_123', activePaymentProvider);
+          setInvoices(history);
+        }
+      } catch (e) {
+        const history = await paymentService.getInvoiceHistory('user_123', activePaymentProvider);
+        setInvoices(history);
+      }
     };
     loadInvoices();
-  }, [activePaymentProvider]);
+  }, [activePaymentProvider, userProfile.subscription]);
 
   const toggleTheme = () => {
     const nextTheme = theme === 'light' ? 'dark' : 'light';
@@ -188,26 +221,44 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // Provider agnostic checkout integration
-  const upgradeSubscription = async (planId: string = 'monthly_plan', amount: number = 19.00): Promise<string> => {
-    const session = await paymentService.createCheckoutSession(
-      'user_123',
-      planId,
-      amount,
-      'USD',
-      window.location.origin + '/pricing'
-    );
-    
-    // Increment DB counter representing Cloudflare binding write operations
-    setSystemMetrics(prev => ({ ...prev, dbOps: prev.dbOps + 1 }));
-    return session.url;
+  const upgradeSubscription = async (
+    planId: string = "monthly_plan",
+    amount: number = 14.99
+  ): Promise<{ transactionId: string; checkoutUrl: string }> => {
+    const res = await fetch("/api/paddle/checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ planId, amount })
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || "Failed to create checkout session");
+    }
+    const data = await res.json();
+    setSystemMetrics((prev) => ({ ...prev, dbOps: prev.dbOps + 1 }));
+    return {
+      transactionId: data.transactionId,
+      checkoutUrl: data.checkoutUrl
+    };
   };
 
   const cancelActiveSubscription = async () => {
-    // Call generic cancel on payment service
-    await paymentService.cancelSubscription('sub_mock_id', activePaymentProvider);
-    
-    // Simulate webhook arrival immediately updating state to inactive
-    generateMockWebhook('subscription.cancelled');
+    const res = await fetch("/api/paddle/cancel", { method: "POST" });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || "Failed to cancel subscription");
+    }
+    // Refresh user profile after cancellation
+    const profileRes = await fetch("/api/user/profile");
+    if (profileRes.ok) {
+      const data = await profileRes.json();
+      const updatedProfile = {
+        ...userProfile,
+        subscription: data.subscription
+      };
+      setUserProfile(updatedProfile);
+      localStorage.setItem('ls_user_profile', JSON.stringify(updatedProfile));
+    }
   };
 
   // Mock Webhook Generator - demonstrates business logic isolation from webhooks!

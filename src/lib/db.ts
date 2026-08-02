@@ -1,4 +1,6 @@
 // Stubs for legacy real estate data models to prevent Turbopack compilation errors
+import { getCloudflareContext } from "@opennextjs/cloudflare";
+
 export interface Country { id: string; name: string; slug: string; }
 export interface Neighborhood { id: string; name: string; slug: string; }
 export interface City { id: string; name: string; slug: string; country: string; neighborhoods: Neighborhood[]; }
@@ -7,6 +9,18 @@ export interface Property { id: string; name: string; slug: string; price: numbe
 export const countries: Country[] = [];
 export const cities: City[] = [];
 export const properties: Property[] = [];
+
+export function getD1(): any {
+  try {
+    const context = getCloudflareContext();
+    if (context && context.env && context.env.DB) {
+      return context.env.DB;
+    }
+  } catch (e) {
+    // Suppress warning during static building / SSR outside Workers
+  }
+  return null;
+}
 
 const isBrowser = typeof window !== 'undefined';
 
@@ -321,5 +335,125 @@ export const db = {
     }
 
     return filtered;
+  },
+
+  // --- Users & Paddle Billing (D1 with mock/localStorage fallback) ---
+  async getUser(id: string): Promise<any | null> {
+    const d1 = getD1();
+    if (d1) {
+      return await d1.prepare("SELECT * FROM users WHERE id = ?").bind(id).first();
+    }
+    // Browser local storage fallback
+    if (isBrowser) {
+      const stored = localStorage.getItem('ls_user_profile');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        return { id, ...parsed };
+      }
+    }
+    return {
+      id,
+      email: "alex@example.com",
+      name: "Alex",
+      subscription: "Free"
+    };
+  },
+
+  async updateUserSubscription(
+    id: string,
+    data: {
+      subscription: "Free" | "Premium";
+      paddleCustomerId: string | null;
+      paddleSubscriptionId: string | null;
+      paddleBillingStatus: string | null;
+      paddleRenewalDate: string | null;
+      paddlePlanId: string | null;
+    }
+  ): Promise<void> {
+    const d1 = getD1();
+    if (d1) {
+      await d1.prepare(
+        "UPDATE users SET subscription = ?, paddle_customer_id = ?, paddle_subscription_id = ?, paddle_billing_status = ?, paddle_renewal_date = ?, paddle_plan_id = ? WHERE id = ?"
+      ).bind(
+        data.subscription,
+        data.paddleCustomerId,
+        data.paddleSubscriptionId,
+        data.paddleBillingStatus,
+        data.paddleRenewalDate,
+        data.paddlePlanId,
+        id
+      ).run();
+    }
+    // Update local storage for client preview synchronization
+    if (isBrowser) {
+      const stored = localStorage.getItem('ls_user_profile');
+      const profile = stored ? JSON.parse(stored) : {};
+      const updated = {
+        ...profile,
+        subscription: data.subscription,
+        paddleCustomerId: data.paddleCustomerId,
+        paddleSubscriptionId: data.paddleSubscriptionId,
+        paddleBillingStatus: data.paddleBillingStatus,
+        paddleRenewalDate: data.paddleRenewalDate,
+        paddlePlanId: data.paddlePlanId
+      };
+      localStorage.setItem('ls_user_profile', JSON.stringify(updated));
+    }
+  },
+
+  async hasProcessedEvent(eventId: string, provider: string): Promise<boolean> {
+    const d1 = getD1();
+    if (d1) {
+      const result = await d1.prepare(
+        "SELECT 1 FROM processed_payment_events WHERE event_id = ? AND provider = ?"
+      ).bind(eventId, provider).first();
+      return !!result;
+    }
+    return false;
+  },
+
+  async logProcessedEvent(eventId: string, provider: string): Promise<void> {
+    const d1 = getD1();
+    if (d1) {
+      await d1.prepare(
+        "INSERT INTO processed_payment_events (event_id, provider) VALUES (?, ?)"
+      ).bind(eventId, provider).run();
+    }
+  },
+
+  async createInvoice(invoice: {
+    id: string;
+    userId: string;
+    amount: number;
+    currency: string;
+    status: string;
+    pdfUrl?: string;
+    provider: string;
+  }): Promise<void> {
+    const d1 = getD1();
+    if (d1) {
+      await d1.prepare(
+        "INSERT INTO invoices (id, user_id, amount, currency, status, pdf_url, provider) VALUES (?, ?, ?, ?, ?, ?, ?)"
+      ).bind(
+        invoice.id,
+        invoice.userId,
+        invoice.amount,
+        invoice.currency,
+        invoice.status,
+        invoice.pdfUrl || null,
+        invoice.provider
+      ).run();
+    }
+  },
+
+  async getInvoices(userId: string): Promise<any[]> {
+    const d1 = getD1();
+    if (d1) {
+      const { results } = await d1.prepare(
+        "SELECT * FROM invoices WHERE user_id = ? ORDER BY date DESC"
+      ).bind(userId).all();
+      return results;
+    }
+    return [];
   }
 };

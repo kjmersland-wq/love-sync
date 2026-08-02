@@ -118,6 +118,20 @@ export class PaymentService {
       throw err;
     }
   }
+  public async getSubscriptionManagementUrls(
+    subscriptionId: string,
+    providerOverride?: PaymentProviderName
+  ): Promise<{ updatePaymentMethod: string; cancel: string } | null> {
+    const provider = this.getProvider(providerOverride);
+    if (provider.getSubscriptionManagementUrls) {
+      try {
+        return await provider.getSubscriptionManagementUrls(subscriptionId);
+      } catch (err) {
+        PaymentLogger.error(`Failed to get subscription management URLs for subscription=${subscriptionId}`, err);
+      }
+    }
+    return null;
+  }
 
   public async getInvoiceHistory(
     userId: string,

@@ -53,4 +53,6 @@ export interface PaymentProvider {
   getInvoiceHistory(userId: string): Promise<Invoice[]>;
   
   handleWebhookEvent(headers: Record<string, string>, rawBody: string): Promise<WebhookEvent>;
+
+  getSubscriptionManagementUrls?(subscriptionId: string): Promise<{ updatePaymentMethod: string; cancel: string } | null>;
 }

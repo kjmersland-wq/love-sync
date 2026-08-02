@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 import { useApp } from '../context/AppContext';
 import { useI18n } from '../lib/i18n/I18nContext';
 import { Select } from './ui/Select';
-import { Sun, Moon, Menu, X, Heart, MessageSquare, ShieldCheck, CreditCard, Settings, Sparkles } from 'lucide-react';
+import { Sun, Moon, Menu, X, Heart, MessageSquare, ShieldCheck, CreditCard, Settings, Sparkles, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export const Navbar: React.FC = () => {
@@ -20,6 +20,28 @@ export const Navbar: React.FC = () => {
   const { locale, t, changeLanguage } = useI18n();
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [billingLoading, setBillingLoading] = useState(false);
+
+  const handleManageBilling = async () => {
+    setBillingLoading(true);
+    try {
+      const res = await fetch("/api/paddle/portal");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.portalUrl) {
+          window.open(data.portalUrl, "_blank");
+        } else {
+          window.location.href = `/${locale}/pricing`;
+        }
+      } else {
+        window.location.href = `/${locale}/pricing`;
+      }
+    } catch (e) {
+      window.location.href = `/${locale}/pricing`;
+    } finally {
+      setBillingLoading(false);
+    }
+  };
 
   // Unread messages count
   const unreadCount = Object.values(chatThreads).reduce((acc, thread) => {
@@ -108,12 +130,24 @@ export const Navbar: React.FC = () => {
             href={`/${locale}/pricing`}
             className={`text-xs font-semibold px-2.5 py-1 rounded-full border transition-all ${
               userProfile.subscription === 'Premium' 
-                ? 'bg-amber-500/10 border-amber-500/30 text-amber-500'
+                ? 'bg-amber-500/10 border-amber-500/30 text-amber-500 hover:bg-amber-500/20'
                 : 'bg-muted border-border text-muted-foreground hover:bg-secondary'
             }`}
           >
             {userProfile.subscription === 'Premium' ? 'Premium' : 'Free Tier'}
           </Link>
+
+          {/* Manage Billing (Premium only) */}
+          {userProfile.subscription === 'Premium' && (
+            <button
+              onClick={handleManageBilling}
+              disabled={billingLoading}
+              className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-background/50 text-foreground transition-all duration-200 hover:bg-secondary/80 hover:scale-105 disabled:opacity-50"
+              title="Manage Billing"
+            >
+              {billingLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Settings className="h-4.5 w-4.5" />}
+            </button>
+          )}
 
           {/* Theme Toggler */}
           <button
@@ -222,6 +256,22 @@ export const Navbar: React.FC = () => {
                     {userProfile.subscription === 'Premium' ? 'Premium Member' : 'Upgrade Account'}
                   </Link>
                 </div>
+                {userProfile.subscription === 'Premium' && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-foreground">Billing Details</span>
+                    <button
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        handleManageBilling();
+                      }}
+                      disabled={billingLoading}
+                      className="text-xs font-semibold px-3 py-1.5 rounded-lg border border-border bg-background flex items-center gap-1.5 disabled:opacity-50"
+                    >
+                      {billingLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Settings className="h-3 w-3" />}
+                      <span>Manage Billing</span>
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </motion.div>

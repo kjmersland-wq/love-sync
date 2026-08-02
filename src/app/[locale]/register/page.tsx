@@ -47,6 +47,7 @@ export default function Register({ params }: PageProps) {
     
     setTimeout(() => {
       setLoading(false);
+      document.cookie = "ls_user_id=user_123; path=/; max-age=31536000; SameSite=Lax; Secure";
       router.push(`/${locale}/dashboard`);
     }, 1800);
   };

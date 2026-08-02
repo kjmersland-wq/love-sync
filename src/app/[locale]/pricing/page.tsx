@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useApp } from '../../../context/AppContext';
 import { useI18n } from '../../../lib/i18n/I18nContext';
@@ -10,6 +10,7 @@ import {
   AlertCircle, RefreshCw 
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { initializePaddle, Paddle } from "@paddle/paddle-js";
 
 export default function Pricing() {
   const router = useRouter();
@@ -25,6 +26,7 @@ export default function Pricing() {
   const [loading, setLoading] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
+  const [paddle, setPaddle] = useState<Paddle | null>(null);
 
   // Card input states
   const [cardNumber, setCardNumber] = useState('');
@@ -32,29 +34,83 @@ export default function Pricing() {
   const [cardCvc, setCardCvc] = useState('');
   const [selectedBank, setSelectedBank] = useState('iDEAL');
 
+  useEffect(() => {
+    const clientToken = process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN;
+    const environment = (process.env.NEXT_PUBLIC_PADDLE_ENVIRONMENT || "sandbox") as any;
+
+    if (clientToken) {
+      initializePaddle({
+        environment,
+        token: clientToken,
+      }).then((paddleInstance) => {
+        if (paddleInstance) setPaddle(paddleInstance);
+      }).catch((e) => {
+        console.error("Failed to initialize Paddle SDK:", e);
+      });
+    }
+  }, []);
+
   const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const planId = billingCycle === 'monthly' ? 'monthly_plan' : 'yearly_plan';
-      const amount = billingCycle === 'monthly' ? 19.00 : 144.00;
-      const checkoutUrl = await upgradeSubscription(planId, amount);
-      console.log(`[Checkout Redirect] Navigating to active provider URL: ${checkoutUrl}`);
+      const planId = billingCycle === 'monthly' 
+        ? (process.env.NEXT_PUBLIC_PADDLE_PRICE_MONTHLY || 'monthly_plan') 
+        : (process.env.NEXT_PUBLIC_PADDLE_PRICE_YEARLY || 'yearly_plan');
+      const amount = billingCycle === 'monthly' ? 14.99 : 119.00;
+
+      const { transactionId, checkoutUrl } = await upgradeSubscription(planId, amount);
       
-      // Simulate external provider checkout screen redirect (e.g. Stripe checkout page or Paypal modal)
-      setTimeout(() => {
+      if (paddle && transactionId) {
         setLoading(false);
-        // Call local simulator trigger that simulates hook arrival
+        paddle.Checkout.open({
+          settings: {
+            displayMode: "overlay",
+            theme: "dark",
+            locale: locale === "no" ? "no" : "en"
+          },
+          transactionId: transactionId
+        });
+      } else {
+        // Fallback to hosted checkout redirect
         window.location.href = checkoutUrl;
-      }, 1500);
+      }
     } catch (err) {
       setLoading(false);
+      alert("Checkout error: " + (err as Error).message);
+    }
+  };
+
+  const handleManageSubscription = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/paddle/portal");
+      if (!res.ok) {
+        const err = await res.json();
+        alert(err.error || "Failed to load subscription portal");
+        setLoading(false);
+        return;
+      }
+      const data = await res.json();
+      setLoading(false);
+      if (data.portalUrl) {
+        window.open(data.portalUrl, "_blank");
+      } else {
+        alert("Management portal URL not available");
+      }
+    } catch (err) {
+      setLoading(false);
+      alert("Error fetching billing portal.");
     }
   };
 
   const handleCancelSubscription = async () => {
     setLoading(true);
-    await cancelActiveSubscription();
+    try {
+      await cancelActiveSubscription();
+    } catch (err) {
+      alert("Cancellation error: " + (err as Error).message);
+    }
     setLoading(false);
     setShowCancelModal(false);
   };
@@ -184,9 +240,17 @@ export default function Pricing() {
               <div className="pt-4 flex flex-col gap-2">
                 <button
                   onClick={() => router.push(`/${locale}/dashboard`)}
-                  className="w-full py-2.5 rounded-xl bg-foreground text-background text-xs font-semibold hover:bg-foreground/90 transition-colors shadow"
+                  className="w-full py-2.5 rounded-xl border border-border bg-secondary/35 text-foreground text-xs font-semibold hover:bg-secondary/60 transition-colors shadow"
                 >
                   Go to Dashboard
+                </button>
+                <button
+                  onClick={handleManageSubscription}
+                  disabled={loading}
+                  className="w-full py-2.5 rounded-xl bg-foreground text-background text-xs font-semibold hover:bg-foreground/90 transition-colors shadow flex items-center justify-center gap-1.5"
+                >
+                  {loading && <Loader2 className="h-3 w-3 animate-spin" />}
+                  <span>Manage Billing & Payment Details</span>
                 </button>
                 <button
                   onClick={() => setShowCancelModal(true)}

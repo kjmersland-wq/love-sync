@@ -1,12 +1,40 @@
 import { PaymentProvider, CheckoutSession, Invoice, WebhookEvent } from '../types';
 import { verifyPaddleWebhook } from '../crypto';
+import { getCloudflareContext } from '@opennextjs/cloudflare';
+
+function getPaddleConfig() {
+  try {
+    const context = getCloudflareContext();
+    if (context && context.env) {
+      return {
+        apiKey: context.env.PADDLE_API_KEY || process.env.PADDLE_API_KEY || '',
+        environment: context.env.NEXT_PUBLIC_PADDLE_ENVIRONMENT || process.env.NEXT_PUBLIC_PADDLE_ENVIRONMENT || 'sandbox'
+      };
+    }
+  } catch (e) {
+    // Outside worker context
+  }
+  return {
+    apiKey: process.env.PADDLE_API_KEY || '',
+    environment: process.env.NEXT_PUBLIC_PADDLE_ENVIRONMENT || 'sandbox'
+  };
+}
 
 export class PaddleProvider implements PaymentProvider {
   name = 'paddle' as const;
 
-  // Retrieve Paddle client secret binding at runtime
   private getWebhookSecret(): string {
+    try {
+      const context = getCloudflareContext();
+      if (context && context.env && context.env.PADDLE_WEBHOOK_SECRET) {
+        return context.env.PADDLE_WEBHOOK_SECRET;
+      }
+    } catch (e) {}
     return process.env.PADDLE_WEBHOOK_SECRET || 'pdl_webhook_sec_mock_12345';
+  }
+
+  private getBaseUrl(environment: string): string {
+    return environment === 'sandbox' ? 'https://sandbox-api.paddle.com' : 'https://api.paddle.com';
   }
 
   async createCheckoutSession(
@@ -16,15 +44,47 @@ export class PaddleProvider implements PaymentProvider {
     currency: string,
     returnUrl: string
   ): Promise<CheckoutSession> {
-    console.log(`[Paddle Billing v2 API] POST /checkout-sessions for user=${userId}, plan=${planId}`);
-    
-    // Simulate Paddle Billing v2 transaction structure
-    const transactionId = `txn_${Math.random().toString(36).substr(2, 9)}`;
-    const paylink = `${returnUrl}?paddle_txn_id=${transactionId}&provider=paddle`;
-    
+    const { apiKey, environment } = getPaddleConfig();
+    if (!apiKey) {
+      throw new Error('[Paddle Provider] PADDLE_API_KEY is not configured');
+    }
+
+    const baseUrl = this.getBaseUrl(environment);
+
+    console.log(`[Paddle Billing API] Creating transaction for user=${userId}, priceId=${planId}`);
+
+    // Create a transaction on Paddle Billing API to link userId custom_data securely
+    const response = await fetch(`${baseUrl}/transactions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        items: [
+          {
+            price_id: planId,
+            quantity: 1
+          }
+        ],
+        custom_data: {
+          userId
+        }
+      })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`[Paddle Billing API Error] Failed to create transaction: ${errorText}`);
+    }
+
+    const resData = await response.json();
+    const transactionId = resData.data.id;
+    const checkoutUrl = resData.data.checkout?.url || `${returnUrl}?paddle_txn_id=${transactionId}&provider=paddle`;
+
     return {
       id: transactionId,
-      url: paylink,
+      url: checkoutUrl,
       provider: this.name,
       amount,
       currency,
@@ -33,25 +93,97 @@ export class PaddleProvider implements PaymentProvider {
   }
 
   async cancelSubscription(subscriptionId: string): Promise<boolean> {
-    console.log(`[Paddle Billing v2 API] POST /subscriptions/${subscriptionId}/cancel`);
+    const { apiKey, environment } = getPaddleConfig();
+    if (!apiKey) {
+      throw new Error('[Paddle Provider] PADDLE_API_KEY is not configured');
+    }
+
+    const baseUrl = this.getBaseUrl(environment);
+    console.log(`[Paddle Billing API] Canceling subscription: ${subscriptionId}`);
+
+    const response = await fetch(`${baseUrl}/subscriptions/${subscriptionId}/cancel`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        effective_from: 'next_billing_period'
+      })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`[Paddle Billing API Error] Failed to cancel subscription: ${errorText}`);
+      return false;
+    }
+
     return true;
   }
 
-  async getInvoiceHistory(userId: string): Promise<Invoice[]> {
-    console.log(`[Paddle Billing v2 API] GET /transactions?customer_id=${userId}&status=paid`);
-    
-    // Conforms to Paddle Billing v2 transactional billing invoice model
-    return [
-      {
-        id: `inv_paddle_${Math.random().toString(36).substr(2, 6)}`,
-        date: new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString(),
-        amount: 19.00,
-        currency: 'USD',
-        status: 'paid',
-        pdfUrl: 'https://paddle.com/receipt-pdf-mock',
-        provider: this.name
+  async getSubscriptionManagementUrls(subscriptionId: string): Promise<{ updatePaymentMethod: string; cancel: string } | null> {
+    const { apiKey, environment } = getPaddleConfig();
+    if (!apiKey) return null;
+
+    const baseUrl = this.getBaseUrl(environment);
+
+    const response = await fetch(`${baseUrl}/subscriptions/${subscriptionId}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`
       }
-    ];
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const resData = await response.json();
+    const managementUrls = resData.data.management_urls;
+    return {
+      updatePaymentMethod: managementUrls?.update_payment_method || '',
+      cancel: managementUrls?.cancel || ''
+    };
+  }
+
+  async getInvoiceHistory(userId: string): Promise<Invoice[]> {
+    const { apiKey, environment } = getPaddleConfig();
+    if (!apiKey) {
+      // Return fallback invoices from local storage or empty
+      return [];
+    }
+
+    const baseUrl = this.getBaseUrl(environment);
+    // Find transactions with paid status and matching custom data
+    const response = await fetch(`${baseUrl}/transactions?status=billed,completed`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`
+      }
+    });
+
+    if (!response.ok) {
+      return [];
+    }
+
+    const resData = await response.json();
+    const transactions = resData.data || [];
+
+    // Filter transactions by custom_data.userId since Paddle Billing API list does not support deep filtering on custom_data
+    const userTransactions = transactions.filter((tx: any) => tx.custom_data?.userId === userId);
+
+    return userTransactions.map((tx: any) => {
+      const amount = tx.details?.totals?.grand_total ? parseFloat(tx.details.totals.grand_total) / 100 : 14.99;
+      return {
+        id: tx.id,
+        date: tx.billed_at || tx.created_at,
+        amount,
+        currency: tx.currency_code || 'USD',
+        status: tx.status === 'completed' ? 'paid' : 'open',
+        pdfUrl: tx.checkout?.url || null,
+        provider: this.name
+      };
+    });
   }
 
   async handleWebhookEvent(headers: Record<string, string>, rawBody: string): Promise<WebhookEvent> {
@@ -62,8 +194,6 @@ export class PaddleProvider implements PaymentProvider {
     if (!isValid) {
       throw new Error('[Paddle Provider Error] Security alert: Webhook signature verification failed.');
     }
-
-    console.log('[Paddle Provider] Webhook signature verified successfully via Web Crypto.');
 
     const parsed = JSON.parse(rawBody);
     const eventType = parsed.event_type;
@@ -80,11 +210,15 @@ export class PaddleProvider implements PaymentProvider {
       normalizedType = 'subscription.cancelled';
     }
     
+    const amount = data.details?.totals?.grand_total 
+      ? parseFloat(data.details.totals.grand_total) / 100 
+      : 14.99;
+
     return {
       type: normalizedType,
       userId: data.custom_data?.userId || 'unknown_user',
       subscriptionId: data.id || 'sub_paddle_mock',
-      amount: data.items?.[0]?.price?.unit_price ? parseFloat(data.items[0].price.unit_price) / 100 : 19.00,
+      amount,
       currency: data.currency_code || 'USD',
       timestamp: parsed.occurred_at || new Date().toISOString(),
       rawPayload: parsed,
