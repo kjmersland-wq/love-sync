@@ -29,22 +29,43 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const { locale } = await params;
   
   const titles = {
-    en: "Next Place Living — Premium Relocation & Property Discovery",
-    no: "Next Place Living — Premium Relokalisering & Eiendomssøk",
-    pl: "Next Place Living — Ekskluzywne Przeprowadzki i Nieruchomości",
+    en: "Love Sync — Premium International Connections",
+    no: "Love Sync — Premium internasjonale forbindelser",
+    pl: "Love Sync — Elitarne znajomości międzynarodowe",
   };
 
   const descriptions = {
-    en: "Discover countries, compare cost of living, explore neighborhood safety ratings, and find your dream home. Voted #1 expat relocation planner.",
-    no: "Oppdag land, sammenlign levekostnader, utforsk nabolagssikkerhet og finn ditt drømmehjem. Kåret til #1 flytteplanlegger.",
-    pl: "Odkryj kraje, porównaj koszty życia, sprawdź bezpieczeństwo dzielnic i znajdź wymarzony dom. Wybrany jako #1 planer przeprowadzek.",
+    en: "Connect across borders, match by values and lifestyle, and translate messages in real-time. Premium relationship discovery.",
+    no: "Koble sammen på tvers av grenser, match basert på verdier og livsstil, og oversett meldinger i sanntid. Førsteklasses relasjonsplanlegger.",
+    pl: "Nawiąż relacje ponad granicami, dopasuj się pod kątem wartości i stylu życia oraz tłumacz wiadomości w czasie rzeczywistym.",
   };
 
   return {
+    metadataBase: new URL("https://www.love-sync.com"),
     title: titles[locale as keyof typeof titles] || titles.en,
     description: descriptions[locale as keyof typeof descriptions] || descriptions.en,
     icons: {
       icon: "/favicon.ico",
+    },
+    alternates: {
+      canonical: `/${locale}`,
+      languages: {
+        en: "/en",
+        no: "/no",
+        pl: "/pl",
+        de: "/de",
+        fr: "/fr",
+        es: "/es",
+        it: "/it",
+      },
+    },
+    openGraph: {
+      title: titles[locale as keyof typeof titles] || titles.en,
+      description: descriptions[locale as keyof typeof descriptions] || descriptions.en,
+      url: `https://www.love-sync.com/${locale}`,
+      siteName: "Love Sync",
+      locale: locale,
+      type: "website",
     },
   };
 }
