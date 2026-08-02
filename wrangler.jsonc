@@ -10,12 +10,6 @@
     "directory": ".open-next/assets",
     "binding": "ASSETS"
   },
-  "r2_buckets": [
-    {
-      "binding": "NEXT_INC_CACHE_R2_BUCKET",
-      "bucket_name": "love-sync-cache"
-    }
-  ],
   "vars": {
     "NEXT_PUBLIC_TURNSTILE_SITEKEY": "3x00000000000000000000FF", // Mock testing sitekey
     "NEXT_PUBLIC_ACTIVE_PAYMENT_PROVIDER": "paddle",
