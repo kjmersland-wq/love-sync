@@ -85,18 +85,12 @@ export default function Pricing() {
     setLoading(true);
     try {
       const res = await fetch("/api/paddle/portal");
-      if (!res.ok) {
-        const err = await res.json();
-        alert(err.error || "Failed to load subscription portal");
-        setLoading(false);
-        return;
-      }
       const data = await res.json();
       setLoading(false);
-      if (data.portalUrl) {
+      if (data.success && data.portalUrl) {
         window.open(data.portalUrl, "_blank");
       } else {
-        alert("Management portal URL not available");
+        alert(data.error || "Failed to load subscription portal");
       }
     } catch (err) {
       setLoading(false);

@@ -149,16 +149,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           const res = await fetch("/api/user/profile");
           if (res.ok) {
             const data = await res.json();
-            const syncedProfile = {
-              name: data.name || "Alex",
-              age: data.age || 30,
-              gender: data.gender || "Male",
-              location: data.location || "Oslo, Norway",
-              subscription: data.subscription || "Free",
-              verification: { email: true, phone: false, photo: false, id: false }
-            };
-            setUserProfile(syncedProfile);
-            localStorage.setItem('ls_user_profile', JSON.stringify(syncedProfile));
+            if (data.success && data.profile) {
+              const syncedProfile = {
+                name: data.profile.name || "Alex",
+                age: data.profile.age || 30,
+                gender: data.profile.gender || "Male",
+                location: data.profile.location || "Oslo, Norway",
+                subscription: data.profile.subscription || "Free",
+                verification: { email: true, phone: false, photo: false, id: false }
+              };
+              setUserProfile(syncedProfile);
+              localStorage.setItem('ls_user_profile', JSON.stringify(syncedProfile));
+            }
           }
         } catch (e) {
           console.error("Failed to load user profile from D1:", e);
@@ -194,7 +196,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         const res = await fetch("/api/paddle/invoices");
         if (res.ok) {
           const data = await res.json();
-          setInvoices(data.invoices || []);
+          if (data.success) {
+            setInvoices(data.invoices || []);
+          } else {
+            const history = await paymentService.getInvoiceHistory('user_123', activePaymentProvider);
+            setInvoices(history);
+          }
         } else {
           const history = await paymentService.getInvoiceHistory('user_123', activePaymentProvider);
           setInvoices(history);
@@ -230,11 +237,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ planId, amount })
     });
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.error || "Failed to create checkout session");
-    }
+    
     const data = await res.json();
+    if (!data.success) {
+      throw new Error(data.error || "Failed to create checkout session");
+    }
+    
     setSystemMetrics((prev) => ({ ...prev, dbOps: prev.dbOps + 1 }));
     return {
       transactionId: data.transactionId,
@@ -244,20 +252,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const cancelActiveSubscription = async () => {
     const res = await fetch("/api/paddle/cancel", { method: "POST" });
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.error || "Failed to cancel subscription");
+    const data = await res.json();
+    if (!data.success) {
+      throw new Error(data.error || "Failed to cancel subscription");
     }
     // Refresh user profile after cancellation
     const profileRes = await fetch("/api/user/profile");
     if (profileRes.ok) {
-      const data = await profileRes.json();
-      const updatedProfile = {
-        ...userProfile,
-        subscription: data.subscription
-      };
-      setUserProfile(updatedProfile);
-      localStorage.setItem('ls_user_profile', JSON.stringify(updatedProfile));
+      const pData = await profileRes.json();
+      if (pData.success && pData.profile) {
+        const updatedProfile = {
+          ...userProfile,
+          subscription: pData.profile.subscription
+        };
+        setUserProfile(updatedProfile);
+        localStorage.setItem('ls_user_profile', JSON.stringify(updatedProfile));
+      }
     }
   };
 

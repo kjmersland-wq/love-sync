@@ -8,7 +8,7 @@ function getPaddleConfig() {
     if (context && context.env) {
       return {
         apiKey: context.env.PADDLE_API_KEY || process.env.PADDLE_API_KEY || '',
-        environment: context.env.NEXT_PUBLIC_PADDLE_ENVIRONMENT || process.env.NEXT_PUBLIC_PADDLE_ENVIRONMENT || 'sandbox'
+        environment: context.env.PADDLE_ENVIRONMENT || context.env.NEXT_PUBLIC_PADDLE_ENVIRONMENT || process.env.PADDLE_ENVIRONMENT || process.env.NEXT_PUBLIC_PADDLE_ENVIRONMENT || 'sandbox'
       };
     }
   } catch (e) {
@@ -16,7 +16,7 @@ function getPaddleConfig() {
   }
   return {
     apiKey: process.env.PADDLE_API_KEY || '',
-    environment: process.env.NEXT_PUBLIC_PADDLE_ENVIRONMENT || 'sandbox'
+    environment: process.env.PADDLE_ENVIRONMENT || process.env.NEXT_PUBLIC_PADDLE_ENVIRONMENT || 'sandbox'
   };
 }
 

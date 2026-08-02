@@ -14,13 +14,21 @@ export async function POST(request: Request) {
     const userId = userIdCookie ? userIdCookie.split("=")[1].trim() : null;
 
     if (!userId) {
-      return NextResponse.json({ error: "Unauthorized user" }, { status: 401 });
+      return NextResponse.json({
+        success: false,
+        error: "Unauthorized user",
+        details: "No user session cookie found."
+      });
     }
 
     // Get user subscription details from D1
     const user = await db.getUser(userId);
     if (!user || !user.paddle_subscription_id) {
-      return NextResponse.json({ error: "No active subscription found for user" }, { status: 404 });
+      return NextResponse.json({
+        success: false,
+        error: "Subscription not found",
+        details: "No active subscription details registered in database."
+      });
     }
 
     // Call cancel API
@@ -30,11 +38,14 @@ export async function POST(request: Request) {
     );
 
     if (!success) {
-      return NextResponse.json({ error: "Failed to cancel subscription on Paddle" }, { status: 502 });
+      return NextResponse.json({
+        success: false,
+        error: "Cancellation failed",
+        details: "Failed to request subscription cancellation on Paddle."
+      });
     }
 
     // Immediately update D1 record status to show cancelled/pending cancellation
-    // Note: The webhook will eventually finalize the status, but this provides instant UX feedback.
     await db.updateUserSubscription(userId, {
       subscription: "Premium", // Keep Premium active until current period end
       paddleCustomerId: user.paddle_customer_id,
@@ -46,7 +57,11 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    console.error("[Paddle Cancel API Error]", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("[Paddle Cancel API Error] Real server error:", error);
+    return NextResponse.json({
+      success: false,
+      error: "Internal server error during cancellation",
+      details: error.message
+    });
   }
 }

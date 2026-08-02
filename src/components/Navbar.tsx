@@ -26,13 +26,9 @@ export const Navbar: React.FC = () => {
     setBillingLoading(true);
     try {
       const res = await fetch("/api/paddle/portal");
-      if (res.ok) {
-        const data = await res.json();
-        if (data.portalUrl) {
-          window.open(data.portalUrl, "_blank");
-        } else {
-          window.location.href = `/${locale}/pricing`;
-        }
+      const data = await res.json();
+      if (data.success && data.portalUrl) {
+        window.open(data.portalUrl, "_blank");
       } else {
         window.location.href = `/${locale}/pricing`;
       }

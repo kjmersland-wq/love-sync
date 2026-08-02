@@ -13,13 +13,21 @@ export async function POST(request: Request) {
     const userId = userIdCookie ? userIdCookie.split("=")[1].trim() : null;
 
     if (!userId) {
-      return NextResponse.json({ error: "Unauthorized user" }, { status: 401 });
+      return NextResponse.json({
+        success: false,
+        error: "Unauthorized user",
+        details: "No user session cookie found."
+      });
     }
 
     const { planId, amount } = await payloadJson(request);
 
     if (!planId) {
-      return NextResponse.json({ error: "planId is required" }, { status: 400 });
+      return NextResponse.json({
+        success: false,
+        error: "planId is required",
+        details: "Missing price/plan ID in checkout request."
+      });
     }
 
     const returnUrl = new URL(request.url).origin + "/pricing";
@@ -35,12 +43,24 @@ export async function POST(request: Request) {
     );
 
     return NextResponse.json({
+      success: true,
       transactionId: session.id,
       checkoutUrl: session.url
     });
   } catch (error: any) {
-    console.error("[Paddle Checkout API Error]", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("[Paddle Checkout API Error] Real server error:", error);
+    
+    let details = error.message;
+    try {
+      const parsed = JSON.parse(error.message);
+      details = parsed.error?.detail || parsed.error?.message || error.message;
+    } catch (e) {}
+
+    return NextResponse.json({
+      success: false,
+      error: "Failed to create checkout session",
+      details: details
+    });
   }
 }
 

@@ -13,15 +13,26 @@ export async function GET(request: Request) {
     const userId = userIdCookie ? userIdCookie.split("=")[1].trim() : null;
 
     if (!userId) {
-      return NextResponse.json({ error: "Unauthorized user" }, { status: 401 });
+      return NextResponse.json({
+        success: false,
+        error: "Unauthorized user",
+        details: "No user session cookie found."
+      });
     }
 
     // Retrieve invoices from D1
     const invoices = await db.getInvoices(userId);
 
-    return NextResponse.json({ invoices });
+    return NextResponse.json({
+      success: true,
+      invoices
+    });
   } catch (error: any) {
-    console.error("[Paddle Invoices API Error]", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("[Paddle Invoices API Error] Real server error:", error);
+    return NextResponse.json({
+      success: false,
+      error: "Internal server error during invoice query",
+      details: error.message
+    });
   }
 }

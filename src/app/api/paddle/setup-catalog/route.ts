@@ -7,16 +7,24 @@ export async function POST(request: Request) {
   try {
     const { env } = getCloudflareContext();
     const paddleApiKey = env.PADDLE_API_KEY;
-    const paddleEnv = env.NEXT_PUBLIC_PADDLE_ENVIRONMENT || "sandbox";
+    const paddleEnv = env.PADDLE_ENVIRONMENT || env.NEXT_PUBLIC_PADDLE_ENVIRONMENT || "sandbox";
     const adminSecret = env.ADMIN_SECRET || "ls_admin_setup_secret_987";
 
     const authHeader = request.headers.get("Authorization");
     if (!authHeader || authHeader !== `Bearer ${adminSecret}`) {
-      return NextResponse.json({ error: "Unauthorized access" }, { status: 401 });
+      return NextResponse.json({
+        success: false,
+        error: "Unauthorized access",
+        details: "Authorization header matches neither the admin secret nor is missing."
+      });
     }
 
     if (!paddleApiKey) {
-      return NextResponse.json({ error: "PADDLE_API_KEY environment variable is not set" }, { status: 400 });
+      return NextResponse.json({
+        success: false,
+        error: "Configuration error",
+        details: "PADDLE_API_KEY environment variable is not set."
+      });
     }
 
     const baseUrl = paddleEnv === "sandbox" ? "https://sandbox-api.paddle.com" : "https://api.paddle.com";
@@ -37,7 +45,11 @@ export async function POST(request: Request) {
 
     if (!productResponse.ok) {
       const errText = await productResponse.text();
-      return NextResponse.json({ error: `Failed to create product: ${errText}` }, { status: productResponse.status });
+      return NextResponse.json({
+        success: false,
+        error: "Failed to create product",
+        details: errText
+      });
     }
 
     const productData = await productResponse.json();
@@ -87,7 +99,11 @@ export async function POST(request: Request) {
 
     if (!monthlyPriceResponse.ok) {
       const errText = await monthlyPriceResponse.text();
-      return NextResponse.json({ error: `Failed to create monthly price: ${errText}` }, { status: monthlyPriceResponse.status });
+      return NextResponse.json({
+        success: false,
+        error: "Failed to create monthly price",
+        details: errText
+      });
     }
 
     const monthlyPriceData = await monthlyPriceResponse.json();
@@ -137,19 +153,29 @@ export async function POST(request: Request) {
 
     if (!yearlyPriceResponse.ok) {
       const errText = await yearlyPriceResponse.text();
-      return NextResponse.json({ error: `Failed to create yearly price: ${errText}` }, { status: yearlyPriceResponse.status });
+      return NextResponse.json({
+        success: false,
+        error: "Failed to create yearly price",
+        details: errText
+      });
     }
 
     const yearlyPriceData = await yearlyPriceResponse.json();
     const yearlyPriceId = yearlyPriceData.data.id;
 
     return NextResponse.json({
+      success: true,
       message: "Paddle Billing Catalog setup completed successfully.",
       productId,
       monthlyPriceId,
       yearlyPriceId
     });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("[Paddle Setup Catalog Error] Real server error:", error);
+    return NextResponse.json({
+      success: false,
+      error: "Internal server error during catalog creation",
+      details: error.message
+    });
   }
 }
