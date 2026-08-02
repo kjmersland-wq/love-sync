@@ -1,0 +1,39 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "love-sync",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2024-12-30",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "r2_buckets": [
+    {
+      "binding": "NEXT_INC_CACHE_R2_BUCKET",
+      "bucket_name": "love-sync-cache"
+    }
+  ],
+  "vars": {
+    "NEXT_PUBLIC_TURNSTILE_SITEKEY": "3x00000000000000000000FF", // Mock testing sitekey
+    "NEXT_PUBLIC_ACTIVE_PAYMENT_PROVIDER": "paddle",
+    "NEXT_PUBLIC_PADDLE_ENVIRONMENT": "sandbox",
+    "NEXT_PUBLIC_PADDLE_CLIENT_TOKEN": "",
+    
+    // Feature Flags default values
+    "NEXT_PUBLIC_FEAT_AI_FEATURES": "false",
+    "NEXT_PUBLIC_FEAT_VIDEO_PROFILES": "false",
+    "NEXT_PUBLIC_FEAT_VOICE_MESSAGES": "false",
+    "NEXT_PUBLIC_FEAT_ID_VERIFICATION": "true",
+    "NEXT_PUBLIC_FEAT_REFERRAL_PROGRAM": "false",
+    "NEXT_PUBLIC_FEAT_GIFT_SUBSCRIPTIONS": "false",
+    "NEXT_PUBLIC_FEAT_ADVANCED_MATCHING": "true",
+    "NEXT_PUBLIC_FEAT_PAYMENT_STRIPE": "false",
+    "NEXT_PUBLIC_FEAT_PAYMENT_PAYPAL": "false",
+    "NEXT_PUBLIC_FEAT_PAYMENT_MOLLIE": "false",
+    "NEXT_PUBLIC_FEAT_PAYMENT_ADYEN": "false",
+    "NEXT_PUBLIC_FEAT_PAYMENT_CHECKOUT": "false"
+  }
+}

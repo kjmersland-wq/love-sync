@@ -1,0 +1,459 @@
+export type TranslationKey = keyof typeof en;
+
+export const en = {
+  nav: {
+    brandName: "Love Sync",
+    exploreMatches: "Find Matches",
+    messages: "Messages",
+    pricing: "Premium",
+    verify: "Verify ID",
+    admin: "Admin",
+    themeLight: "Light Mode",
+    themeDark: "Dark Mode",
+    saved: "Saved",
+  },
+  landing: {
+    heroTitle: "Real Relationships. Built on Compatibility.",
+    heroSub: "Discover meaningful connections through intelligent matching, verified identities and thoughtful technology.",
+    ctaStart: "Start Your Journey",
+    ctaLearn: "Learn How It Works",
+    howItWorks: "How It Works",
+    howItWorksSub: "A calm, transparent process designed to help you find the right person—not maximize screen time.",
+    step1Title: "Create your profile",
+    step1Text: "Tell us who you are, your goals, lifestyle and relationship expectations.",
+    step2Title: "Answer compatibility questions",
+    step2Text: "Configure weights for what truly matters to you in a long-term partner.",
+    step3Title: "Receive selected matches",
+    step3Text: "No endless swiping. Get high-compatibility matches based on real parameters.",
+    step4Title: "Start meaningful conversations",
+    step4Text: "Chat securely with translation, safety tips, and conversation starters.",
+    philosophyTitle: "Our Core Philosophy",
+    philosophySubtitle: "Love Sync is an intelligent relationship platform designed for serious people building long-term trust.",
+    trustTitle: "Trust Over Quantity",
+    trustText: "We focus on genuine compatibility. No mysterious AI score—we show you exactly why you match.",
+    qualityTitle: "Quality Connections",
+    qualityText: "By charging a simple monthly subscription, we align our business with your goal of finding a partner, not keeping you hooked.",
+    privacyTitle: "Privacy by Design",
+    privacyText: "Your data is secure and encrypted. We enforce optional multi-level verification (Email, Phone, Photo, ID) for safety."
+  },
+  dashboard: {
+    title: "Compatibility Engine",
+    subtitle: "Adjust matching category weights dynamically to find partners aligned with your lifestyle.",
+    weightConfig: "Matching Engine Weight Configuration",
+    weightTotal: "Total Weight",
+    matchesFound: "Selected High-Compatibility Matches",
+    matchLabel: "Match Score",
+    viewProfile: "View Details",
+    chatNow: "Open Chat",
+    categories: {
+      familyGoals: "Family Goals",
+      lifestyle: "Lifestyle",
+      personality: "Personality",
+      values: "Values",
+      interests: "Interests",
+      distance: "Distance",
+      age: "Age"
+    },
+    whyMatch: "Why You Match",
+    savedMatches: "Saved Profiles",
+    filterTitle: "Filter Matches",
+    ageRange: "Age Range",
+    noMatches: "No matches found. Try adjusting your compatibility weights or filters."
+  },
+  profile: {
+    about: "About",
+    introduction: "Introduction",
+    lifestyle: "Lifestyle",
+    values: "Values",
+    goals: "Goals & Expectations",
+    interests: "Interests & Hobbies",
+    verifiedStatus: "Verification Badge",
+    notVerified: "Unverified profile. Engage with caution.",
+    verifiedBadge: "Verified Member",
+    verifiedBadges: {
+      email: "Email Verified",
+      phone: "Phone Verified",
+      photo: "Photo Verified",
+      id: "ID Verified"
+    }
+  },
+  messaging: {
+    title: "Secure Messaging",
+    typing: "is typing...",
+    read: "Read",
+    sent: "Sent",
+    starterTitle: "Need a conversation starter?",
+    starterButton: "Generate Starter",
+    translateToggle: "Translate Chat",
+    translatedFrom: "Translated from",
+    safetyAlert: "Safety Notice: Never share bank details or agree to send money. Keep chats on Love Sync until trust is established.",
+    typePlaceholder: "Type a thoughtful message...",
+    send: "Send",
+    noActiveChat: "Select a high-compatibility match to start a meaningful conversation."
+  },
+  verify: {
+    title: "Identity Verification Portal",
+    subtitle: "Verify your profile to earn the Verified Badge. Trust is our competitive advantage.",
+    emailLabel: "Email Verification",
+    phoneLabel: "Phone Verification",
+    photoLabel: "Photo Verification",
+    idLabel: "Government ID Verification",
+    buttonVerify: "Verify Now",
+    buttonCompleted: "Verified",
+    progressTitle: "Verification Progress",
+    cameraMock: "Simulated camera feed active...",
+    photoCapture: "Capture Photo",
+    idUpload: "Upload ID Copy",
+    successMsg: "Profile verified! Your trust rating is now active."
+  },
+  pricing: {
+    title: "Simple Premium Membership",
+    subtitle: "No free tier. No advertising. No hidden fees. Everything included.",
+    priceText: "$19/month",
+    priceTextYearly: "$144/year",
+    priceSubText: "Billed monthly. Cancel with one click.",
+    priceSubTextYearly: "Billed annually ($12/month). Cancel with one click.",
+    featuresList: [
+      "Deterministic matching algorithms",
+      "Full transparency of compatibility breakdowns",
+      "Robust photo & government ID verification",
+      "Translation & conversation helpers",
+      "No trackers, ad networks, or data sales",
+      "Cancel at any time with one click"
+    ],
+    ctaSubscribe: "Upgrade to Premium",
+    securePayment: "Secure Payment via Paddle"
+  },
+  admin: {
+    title: "Love Sync Command Center",
+    subtitle: "Operational analytics, moderation reports, and database statistics.",
+    totalUsers: "Total Users",
+    premiumSubs: "Premium Subscribers",
+    pendingVerifications: "Pending Verifications",
+    flaggedReports: "Flagged Reports",
+    healthTitle: "Cloudflare Edge System Health",
+    workerLatency: "Worker Edge Latency",
+    databaseUsage: "D1 Database Ops",
+    storageUsage: "R2 Image Storage",
+    moderationQueue: "Moderation Queue",
+    moderationResolve: "Resolve",
+    verifQueue: "Verification Queue",
+    verifApprove: "Approve Check",
+    analyticsOverview: "Analytics Overview"
+  }
+};
+
+// Norwegian translation
+export const no: TranslationsDictionary = {
+  nav: {
+    brandName: "Love Sync",
+    exploreMatches: "Finn Matcher",
+    messages: "Meldinger",
+    pricing: "Premium",
+    verify: "Verifisering",
+    admin: "Admin",
+    themeLight: "Lyst modus",
+    themeDark: "Mørkt modus",
+    saved: "Lagret",
+  },
+  landing: {
+    heroTitle: "Ekte Relasjoner. Bygget på Kompatibilitet.",
+    heroSub: "Oppdag meningsfulle forbindelser gjennom intelligent matching, verifiserte identiteter og gjennomtenkt teknologi.",
+    ctaStart: "Start Din Reise",
+    ctaLearn: "Slik fungerer det",
+    howItWorks: "Hvordan det fungerer",
+    howItWorksSub: "En rolig, gjennomsiktig prosess designet for å hjelpe deg med å finne den rette personen – ikke maksimere skjermtid.",
+    step1Title: "Opprett din profil",
+    step1Text: "Fortell oss hvem du er, dine mål, livsstil og forventninger til forholdet.",
+    step2Title: "Svar på kompatibilitetsspørsmål",
+    step2Text: "Konfigurer vekter for det som virkelig betyr noe for deg i en partner.",
+    step3Title: "Motta utvalgte matcher",
+    step3Text: "Ingen endeløs sveiping. Få treff med høy kompatibilitet basert på reelle parametere.",
+    step4Title: "Start meningsfulle samtaler",
+    step4Text: "Chat trygt med oversettelse, sikkerhetstips og samtalestartere.",
+    philosophyTitle: "Vår Kjernefilosofi",
+    philosophySubtitle: "Love Sync er en intelligent relasjonsplattform designet for seriøse mennesker som søker varig tillit.",
+    trustTitle: "Tillit over Kvantitet",
+    trustText: "Vi fokuserer på reell kompatibilitet. Ingen mystisk AI-score – vi viser deg nøyaktig hvorfor dere matcher.",
+    qualityTitle: "Kvalitetstilkoblinger",
+    qualityText: "Ved å kreve et enkelt månedlig abonnement, samkjører vi vår virksomhet med ditt mål om å finne en partner, ikke holde deg avhengig.",
+    privacyTitle: "Personvern fra Grunnen av",
+    privacyText: "Dine data er sikre og kryptert. Vi håndhever valgfri flernivåverifisering (E-post, Telefon, Foto, ID) for sikkerhet."
+  },
+  dashboard: {
+    title: "Kompatibilitetsmotor",
+    subtitle: "Juster kompatibilitetsvektene dynamisk for å finne partnere som passer din livsstil.",
+    weightConfig: "Konfigurasjon av Matchingsvekter",
+    weightTotal: "Total Vekt",
+    matchesFound: "Utvalgte Matcher med Høy Kompatibilitet",
+    matchLabel: "Match Score",
+    viewProfile: "Vis Detaljer",
+    chatNow: "Åpne Chat",
+    categories: {
+      familyGoals: "Familiemål",
+      lifestyle: "Livsstil",
+      personality: "Personlighet",
+      values: "Verdier",
+      interests: "Interesser",
+      distance: "Avstand",
+      age: "Alder"
+    },
+    whyMatch: "Hvorfor dere matcher",
+    savedMatches: "Lagrede Profiler",
+    filterTitle: "Filtrer Matcher",
+    ageRange: "Aldersgruppe",
+    noMatches: "Ingen matcher funnet. Prøv å justere vektene eller filtrene dine."
+  },
+  profile: {
+    about: "Om",
+    introduction: "Introduksjon",
+    lifestyle: "Livsstil",
+    values: "Verdier",
+    goals: "Mål & Forventninger",
+    interests: "Interesser & Hobbyer",
+    verifiedStatus: "Verifiseringsstatus",
+    notVerified: "Uverifisert profil. Chat med forsiktighet.",
+    verifiedBadge: "Verifisert Medlem",
+    verifiedBadges: {
+      email: "E-post verifisert",
+      phone: "Telefon verifisert",
+      photo: "Foto verifisert",
+      id: "ID verifisert"
+    }
+  },
+  messaging: {
+    title: "Sikker Chat",
+    typing: "skriver...",
+    read: "Lest",
+    sent: "Sendt",
+    starterTitle: "Trenger du en samtalestarter?",
+    starterButton: "Generer Starter",
+    translateToggle: "Oversett Melding",
+    translatedFrom: "Oversatt fra",
+    safetyAlert: "Sikkerhetsvarsel: Del aldri bankdetaljer eller overfør penger. Hold samtalene på Love Sync til du er helt trygg.",
+    typePlaceholder: "Skriv en gjennomtenkt melding...",
+    send: "Send",
+    noActiveChat: "Velg en match fra listen for å starte en meningsfull samtale."
+  },
+  verify: {
+    title: "Portal for Identitetsverifisering",
+    subtitle: "Verifiser profilen din for å få det verifiserte merket. Tillit er vårt konkurransefortrinn.",
+    emailLabel: "E-post verifisering",
+    phoneLabel: "Telefonverifisering",
+    photoLabel: "Fotoverifisering",
+    idLabel: "ID-verifisering (Offentlig ID)",
+    buttonVerify: "Verifiser nå",
+    buttonCompleted: "Verifisert",
+    progressTitle: "Fremdrift for verifisering",
+    cameraMock: "Simulert kamerastrøm aktiv...",
+    photoCapture: "Ta bilde",
+    idUpload: "Last opp ID-kopi",
+    successMsg: "Profil verifisert! Ditt tillitsmerke er nå aktivt."
+  },
+  pricing: {
+    title: "Enkelt Premium-medlemskap",
+    subtitle: "Ingen gratisversjon. Ingen reklame. Ingen skjulte gebyrer. Alt inkludert.",
+    priceText: "190 kr/mnd",
+    priceTextYearly: "1440 kr/år",
+    priceSubText: "Fakturert månedlig. Avslutt når som helst med ett klikk.",
+    priceSubTextYearly: "Fakturert årlig (120 kr/mnd). Avslutt når som helst med ett klikk.",
+    featuresList: [
+      "Deterministiske matchingsalgoritmer",
+      "Full åpenhet rundt kompatibilitetsscore",
+      "Robust foto- og ID-verifisering",
+      "Oversettelses- og samtalehjelp",
+      "Ingen sporingsverktøy, annonsenettverk eller salg av data",
+      "Avslutt når som helst med ett klikk"
+    ],
+    ctaSubscribe: "Oppgrader til Premium",
+    securePayment: "Sikker betaling via Paddle"
+  },
+  admin: {
+    title: "Love Sync Kontrollsenter",
+    subtitle: "Driftsanalyse, modereringsrapporter og databasestatistikk.",
+    totalUsers: "Brukere totalt",
+    premiumSubs: "Premium-abonnenter",
+    pendingVerifications: "Venter på verifisering",
+    flaggedReports: "Rapporterte hendelser",
+    healthTitle: "Cloudflare Edge Systemhelse",
+    workerLatency: "Worker Latens",
+    databaseUsage: "D1 Database Ops",
+    storageUsage: "R2 Bilde-lagring",
+    moderationQueue: "Modereringskø",
+    moderationResolve: "Løs",
+    verifQueue: "Verifiseringskø",
+    verifApprove: "Godkjenn",
+    analyticsOverview: "Analyseoversikt"
+  }
+};
+
+// Polish translation
+export const pl: TranslationsDictionary = {
+  nav: {
+    brandName: "Love Sync",
+    exploreMatches: "Znajdź Dopasowania",
+    messages: "Wiadomości",
+    pricing: "Premium",
+    verify: "Weryfikacja ID",
+    admin: "Admin",
+    themeLight: "Tryb jasny",
+    themeDark: "Tryb ciemny",
+    saved: "Zapisane",
+  },
+  landing: {
+    heroTitle: "Prawdziwe Relacje. Zbudowane na Kompatybilności.",
+    heroSub: "Odkryj znaczące relacje dzięki inteligentnemu dopasowaniu, zweryfikowanym tożsamościom i przemyślanej technologii.",
+    ctaStart: "Rozpocznij Podróż",
+    ctaLearn: "Jak to działa",
+    howItWorks: "Jak to działa",
+    howItWorksSub: "Spokojny, przejrzysty proces stworzony, aby pomóc Ci znaleźć odpowiednią osobę — a nie maksymalizować czas spędzony przed ekranem.",
+    step1Title: "Stwórz swój profil",
+    step1Text: "Opowiedz nam o sobie, swoich celach, stylu życia i oczekiwaniach wobec związku.",
+    step2Title: "Odpowiedz na pytania",
+    step2Text: "Skonfiguruj wagi dla tego, co naprawdę ma dla Ciebie znaczenie u partnera.",
+    step3Title: "Odbierz dopasowania",
+    step3Text: "Bez bezcelowego przewijania. Otrzymuj dopasowania o wysokiej zgodności oparte na realnych danych.",
+    step4Title: "Zacznij rozmawiać",
+    step4Text: "Rozmawiaj bezpiecznie dzięki tłumaczeniom, wskazówkom bezpieczeństwa i pomysłom na rozpoczęcie rozmowy.",
+    philosophyTitle: "Nasza Klockowa Filozofia",
+    philosophySubtitle: "Love Sync to inteligentna platforma relacyjna dla poważnych ludzi budujących długotrwałe zaufanie.",
+    trustTitle: "Zaufanie ponad Ilość",
+    trustText: "Skupiamy się na prawdziwej kompatybilności. Żadnych tajemniczych wyników AI — pokazujemy dokładnie, dlaczego pasujecie do siebie.",
+    qualityTitle: "Połączenia Wysokiej Jakości",
+    qualityText: "Pobierając prostą miesięczną subskrypcję, łączymy nasz biznes z Twoim celem znalezienia partnera, a nie uzależnienia Cię od aplikacji.",
+    privacyTitle: "Prywatność z założenia",
+    privacyText: "Twoje dane są bezpieczne i szyfrowane. Wprowadzamy opcjonalną wielopoziomową weryfikację (E-mail, Telefon, Zdjęcie, Dowód)."
+  },
+  dashboard: {
+    title: "Silnik Kompatybilności",
+    subtitle: "Dostosuj wagi kategorii dopasowania dynamicznie, aby znaleźć partnerów pasujących do Twojego stylu życia.",
+    weightConfig: "Konfiguracja Wag Silnika Dopasowań",
+    weightTotal: "Waga Całkowita",
+    matchesFound: "Wybrane Dopasowania o Wysokiej Kompatybilności",
+    matchLabel: "Wynik Dopasowania",
+    viewProfile: "Wyświetl Szczegóły",
+    chatNow: "Otwórz czat",
+    categories: {
+      familyGoals: "Cele Rodzinne",
+      lifestyle: "Styl Życia",
+      personality: "Osobowość",
+      values: "Wartości",
+      interests: "Zainteresowania",
+      distance: "Odległość",
+      age: "Wiek"
+    },
+    whyMatch: "Dlaczego pasujecie do siebie",
+    savedMatches: "Zapisane Profile",
+    filterTitle: "Filtruj Dopasowania",
+    ageRange: "Przedział Wiekowy",
+    noMatches: "Nie znaleziono dopasowań. Spróbuj dostosować wagi zgodności lub filtry."
+  },
+  profile: {
+    about: "O mnie",
+    introduction: "Wprowadzenie",
+    lifestyle: "Styl życia",
+    values: "Wartości",
+    goals: "Cele i Oczekiwania",
+    interests: "Zainteresowania i Hobby",
+    verifiedStatus: "Status Weryfikacji",
+    notVerified: "Profil niezweryfikowany. Rozmawiaj z ostrożnością.",
+    verifiedBadge: "Zweryfikowany użytkownik",
+    verifiedBadges: {
+      email: "E-mail Zweryfikowany",
+      phone: "Telefon Zweryfikowany",
+      photo: "Zdjęcie Zweryfikowane",
+      id: "Tożsamość Zweryfikowana"
+    }
+  },
+  messaging: {
+    title: "Bezpieczny Czat",
+    typing: "pisze...",
+    read: "Przeczytano",
+    sent: "Wysłano",
+    starterTitle: "Potrzebujesz tematu do rozmowy?",
+    starterButton: "Generuj Temat",
+    translateToggle: "Przetłumacz Czat",
+    translatedFrom: "Przetłumaczono z",
+    safetyAlert: "Wskazówka bezpieczeństwa: Nigdy nie podawaj danych bankowych ani nie wysyłaj pieniędzy. Rozmawiaj w Love Sync do czasu zbudowania pełnego zaufania.",
+    typePlaceholder: "Napisz przemyślaną wiadomość...",
+    send: "Wyślij",
+    noActiveChat: "Wybierz dopasowanie z listy, aby rozpocząć wartościową rozmowę."
+  },
+  verify: {
+    title: "Portal Weryfikacji Tożsamości",
+    subtitle: "Zweryfikuj swój profil, aby otrzymać Odznakę Weryfikacji. Zaufanie to nasza przewaga.",
+    emailLabel: "Weryfikacja E-mail",
+    phoneLabel: "Weryfikacja Telefonu",
+    photoLabel: "Weryfikacja Zdjęcia",
+    idLabel: "Weryfikacja Dokumentu Tożsamości",
+    buttonVerify: "Zweryfikuj Teraz",
+    buttonCompleted: "Zweryfikowano",
+    progressTitle: "Postęp Weryfikacji",
+    cameraMock: "Symulacja kamery aktywna...",
+    photoCapture: "Zrób Zdjęcie",
+    idUpload: "Prześlij Kopię Dowodu",
+    successMsg: "Profil zweryfikowany! Odznaka zaufania została przyznana."
+  },
+  pricing: {
+    title: "Prosty Abonament Premium",
+    subtitle: "Brak darmowej wersji. Brak reklam. Brak ukrytych opłat. Wszystko w cenie.",
+    priceText: "79 zł/mies.",
+    priceTextYearly: "790 zł/rok",
+    priceSubText: "Rozliczane co miesiąc. Anuluj w dowolnym momencie jednym kliknięciem.",
+    priceSubTextYearly: "Rozliczane rocznie (65 zł/miesiąc). Anuluj w dowolnym momencie jednym kliknięciem.",
+    featuresList: [
+      "Deterministyczne algorytmy dopasowania",
+      "Pełna przejrzystość wskaźników zgodności",
+      "Dokładna weryfikacja zdjęć i dowodów tożsamości",
+      "Pomocnik tłumaczeń i tematów rozmów",
+      "Brak trackerów, sieci reklamowych i sprzedaży danych",
+      "Anuluj w dowolnym momencie jednym kliknięciem"
+    ],
+    ctaSubscribe: "Przejdź na Premium",
+    securePayment: "Bezpieczna płatność przez Paddle"
+  },
+  admin: {
+    title: "Centrum Zarządzania Love Sync",
+    subtitle: "Statystyki operacyjne, raporty moderacji i baza danych D1.",
+    totalUsers: "Użytkownicy",
+    premiumSubs: "Subskrypcje Premium",
+    pendingVerifications: "Weryfikacje w kolejce",
+    flaggedReports: "Zgłoszenia naruszeń",
+    healthTitle: "Stan Infrastruktury Cloudflare",
+    workerLatency: "Opóźnienie Workera",
+    databaseUsage: "Zapytania D1 Database",
+    storageUsage: "Baza Zdjęć R2 Storage",
+    moderationQueue: "Kolejka Moderacji",
+    moderationResolve: "Rozwiąż",
+    verifQueue: "Kolejka Weryfikacji",
+    verifApprove: "Zatwierdź",
+    analyticsOverview: "Przegląd Statystyk"
+  }
+};
+
+// Fallback types mapping for dictionaries (supporting de, fr, es, it with English values)
+type TranslationsDictionary = typeof en;
+
+export const de: TranslationsDictionary = {
+  ...en,
+  nav: { ...en.nav, brandName: "Love Sync", exploreMatches: "Matches finden", messages: "Nachrichten", pricing: "Premium", verify: "Identität verifizieren", admin: "Admin", themeLight: "Hellmodus", themeDark: "Dunkelmodus" },
+  landing: { ...en.landing, heroTitle: "Echte Beziehungen. Auf Kompatibilität gebaut.", heroSub: "Entdecken Sie bedeutungsvolle Beziehungen durch intelligentes Matching, verifizierte Identitäten und durchdachte Technologie.", ctaStart: "Reise starten", ctaLearn: "Wie es funktioniert" }
+};
+
+export const fr: TranslationsDictionary = {
+  ...en,
+  nav: { ...en.nav, brandName: "Love Sync", exploreMatches: "Trouver des profils", messages: "Messages", pricing: "Premium", verify: "Vérifier ID", admin: "Admin", themeLight: "Mode clair", themeDark: "Mode sombre" },
+  landing: { ...en.landing, heroTitle: "De vraies relations. Basées sur la compatibilité.", heroSub: "Découvrez des relations significatives grâce à un ciblage intelligent, des profils vérifiés et une technologie éthique.", ctaStart: "Commencer votre voyage", ctaLearn: "Comment ça marche" }
+};
+
+export const es: TranslationsDictionary = {
+  ...en,
+  nav: { ...en.nav, brandName: "Love Sync", exploreMatches: "Buscar Parejas", messages: "Mensajes", pricing: "Premium", verify: "Verificar ID", admin: "Admin", themeLight: "Modo Claro", themeDark: "Modo Oscuro" },
+  landing: { ...en.landing, heroTitle: "Relaciones Reales. Basadas en la Compatibilidad.", heroSub: "Descubra conexiones significativas mediante emparejamiento inteligente, identidades verificadas y tecnología respetuosa.", ctaStart: "Comience Su Viaje", ctaLearn: "Cómo Funciona" }
+};
+
+export const it: TranslationsDictionary = {
+  ...en,
+  nav: { ...en.nav, brandName: "Love Sync", exploreMatches: "Trova Match", messages: "Messaggi", pricing: "Premium", verify: "Verifica ID", admin: "Admin", themeLight: "Modalità Chiara", themeDark: "Modalità Scura" },
+  landing: { ...en.landing, heroTitle: "Relazioni Vere. Costruite sulla Compatibilità.", heroSub: "Scopri connessioni significative attraverso un matching intelligente, identità verificate e tecnologia consapevole.", ctaStart: "Inizia il Tuo Viaggio", ctaLearn: "Come Funziona" }
+};
