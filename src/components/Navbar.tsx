@@ -87,13 +87,13 @@ export const Navbar: React.FC = () => {
   ];
 
   const languageOptions = [
-    { value: 'en', label: '🇬🇧 English' },
-    { value: 'no', label: '🇳🇴 Norsk' },
-    { value: 'pl', label: '🇵🇱 Polski' },
-    { value: 'de', label: '🇩🇪 Deutsch' },
-    { value: 'fr', label: '🇫🇷 Français' },
-    { value: 'es', label: '🇪🇸 Español' },
-    { value: 'it', label: '🇮🇹 Italiano' }
+    { value: 'en', label: '🇬🇧 EN' },
+    { value: 'no', label: '🇳🇴 NO' },
+    { value: 'pl', label: '🇵🇱 PL' },
+    { value: 'de', label: '🇩🇪 DE' },
+    { value: 'fr', label: '🇫🇷 FR' },
+    { value: 'es', label: '🇪🇸 ES' },
+    { value: 'it', label: '🇮🇹 IT' }
   ];
 
   const isLinkActive = (href: string) => {
@@ -147,20 +147,20 @@ export const Navbar: React.FC = () => {
           })}
         </nav>
 
-        {/* Desktop Preferences */}
-        <div className="hidden md:flex items-center gap-3">
-          {/* Language Selector */}
+        {/* Responsive Preferences & Actions */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          {/* Language Selector (Always visible in top bar, compact on mobile) */}
           <Select
             options={languageOptions}
             value={locale}
             onChange={(val) => changeLanguage(val as any)}
-            className="w-32 bg-background/50 border-border/60 hover:bg-secondary/40 transition-colors"
+            className="w-[74px] sm:w-[84px] bg-background/50 border-border/60 hover:bg-secondary/40 transition-colors"
           />
 
-          {/* Membership Badge */}
+          {/* Membership Badge (Tablet & Desktop only) */}
           <Link 
             href={`/${locale}/pricing`}
-            className={`text-xs font-semibold px-2.5 py-1 rounded-full border transition-all ${
+            className={`hidden sm:inline-block text-xs font-semibold px-2.5 py-1 rounded-full border transition-all ${
               userProfile.subscription === 'Premium' 
                 ? 'bg-amber-500/10 border-amber-500/30 text-amber-500 hover:bg-amber-500/20'
                 : 'bg-muted border-border text-muted-foreground hover:bg-secondary'
@@ -169,19 +169,19 @@ export const Navbar: React.FC = () => {
             {userProfile.subscription === 'Premium' ? 'Premium' : 'Not Subscribed'}
           </Link>
 
-          {/* Manage Billing (Premium only) */}
+          {/* Manage Billing (Premium only, hidden on small screens) */}
           {userProfile.subscription === 'Premium' && (
             <button
               onClick={handleManageBilling}
               disabled={billingLoading}
-              className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-background/50 text-foreground transition-all duration-200 hover:bg-secondary/80 hover:scale-105 disabled:opacity-50"
+              className="hidden sm:flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-background/50 text-foreground transition-all duration-200 hover:bg-secondary/80 hover:scale-105 disabled:opacity-50"
               title="Manage Billing"
             >
               {billingLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Settings className="h-4.5 w-4.5" />}
             </button>
           )}
 
-          {/* Theme Toggler */}
+          {/* Theme Toggler (Always visible in top bar) */}
           <button
             onClick={toggleTheme}
             className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-background/50 text-foreground transition-all duration-200 hover:bg-secondary/80 hover:scale-105"
@@ -189,22 +189,11 @@ export const Navbar: React.FC = () => {
           >
             {theme === 'light' ? <Moon className="h-4.5 w-4.5" /> : <Sun className="h-4.5 w-4.5" />}
           </button>
-        </div>
 
-        {/* Mobile menu toggle */}
-        <div className="flex items-center gap-2 md:hidden">
-          {/* Quick theme toggle */}
-          <button
-            onClick={toggleTheme}
-            className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-background/50 text-foreground"
-          >
-            {theme === 'light' ? <Moon className="h-4.5 w-4.5" /> : <Sun className="h-4.5 w-4.5" />}
-          </button>
-
-          {/* Hamburger button */}
+          {/* Hamburger Menu Toggle (Mobile/Tablet only) */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-background/50 text-foreground"
+            className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-background/50 text-foreground md:hidden"
             aria-label="Toggle menu"
           >
             {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
