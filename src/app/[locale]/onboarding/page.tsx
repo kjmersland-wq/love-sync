@@ -4,6 +4,7 @@ import React, { useState, use } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useI18n } from '../../../lib/i18n/I18nContext';
+import { useApp } from '../../../context/AppContext';
 import AuthLayout from '../../../components/AuthLayout';
 import { Heart, ArrowRight, ShieldCheck, Check, Sparkles, ArrowLeft, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -16,6 +17,7 @@ export default function Onboarding({ params }: PageProps) {
   const { locale } = use(params);
   const router = useRouter();
   const { t } = useI18n();
+  const { triggerModal } = useApp();
 
   // Wizard Step states (Step 1 to 4)
   const [step, setStep] = useState(1);
@@ -121,8 +123,11 @@ export default function Onboarding({ params }: PageProps) {
     setSaving(true);
     setTimeout(() => {
       setSaving(false);
-      // Stop and wait for approval on Step 3
-      alert("Step 3 Auto-saved successfully. Ready for design review.");
+      triggerModal(
+        "Auto-Save Completed",
+        "Step 3 profile parameters saved successfully. Ready for compatibility matrix assessment.",
+        "success"
+      );
     }, 1000);
   };
 

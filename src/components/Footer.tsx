@@ -4,9 +4,13 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Heart, Mail, ExternalLink, Globe } from 'lucide-react';
+import { useApp } from '../context/AppContext';
+import { useI18n } from '../lib/i18n/I18nContext';
 
 export default function Footer() {
-  const pathname = usePathname();
+  const pathname = usePathname() || '';
+  const { triggerModal } = useApp();
+  const { t } = useI18n();
 
   // Pathname pattern matches locale prefix (e.g. /en/login, /no/onboarding)
   const isAuthOrOnboarding = pathname.match(
@@ -49,21 +53,42 @@ export default function Footer() {
           <Link href={`/${locale}/help#safety`} className="hover:text-foreground transition-colors">Trust & Safety</Link>
           <a 
             href="#" 
-            onClick={(e) => { e.preventDefault(); alert("Privacy Policy is fully compliant with GDPR regulations. All user data is encrypted and zero sales logs are kept."); }} 
+            onClick={(e) => {
+              e.preventDefault();
+              triggerModal(
+                t('policies.privacyTitle'),
+                t('policies.privacyBody'),
+                "success"
+              );
+            }} 
             className="hover:text-foreground transition-colors"
           >
             Privacy Policy
           </a>
           <a 
             href="#" 
-            onClick={(e) => { e.preventDefault(); alert("Terms of Service define mutual commitments for premium matchmaking operations."); }} 
+            onClick={(e) => {
+              e.preventDefault();
+              triggerModal(
+                t('policies.termsTitle'),
+                t('policies.termsBody'),
+                "info"
+              );
+            }} 
             className="hover:text-foreground transition-colors"
           >
             Terms of Service
           </a>
           <a 
             href="#" 
-            onClick={(e) => { e.preventDefault(); alert("Cookie Policy: Only strict session authentication cookies are active. Zero advertising pixels."); }} 
+            onClick={(e) => {
+              e.preventDefault();
+              triggerModal(
+                t('policies.cookiesTitle'),
+                t('policies.cookiesBody'),
+                "info"
+              );
+            }} 
             className="hover:text-foreground transition-colors"
           >
             Cookie Policy

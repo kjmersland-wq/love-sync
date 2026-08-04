@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useTransition } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { en, no, pl } from './translations';
+import { en, no, pl, de, fr, es, it } from './translations';
 import { getLocalizedUrl, Locale } from './i18n';
 
 type TranslationsDictionary = typeof en;
@@ -21,14 +21,14 @@ export const I18nProvider: React.FC<{ locale: string; children: React.ReactNode 
   children,
 }) => {
   const router = useRouter();
-  const pathname = usePathname();
+  const pathname = usePathname() || '';
   const [isPending, startTransition] = useTransition();
 
-  const activeLocale = (locale === 'no' || locale === 'pl' ? locale : 'en') as Locale;
+  const activeLocale = (['en', 'no', 'pl', 'de', 'fr', 'es', 'it'].includes(locale) ? locale : 'en') as Locale;
 
   // Translation resolver helper
   const t = (key: string, variables?: { [key: string]: string | number }): any => {
-    const dictionaries = { en, no, pl };
+    const dictionaries = { en, no, pl, de, fr, es, it };
     const dictionary = dictionaries[activeLocale] || en;
     const fallbackDictionary = en;
 

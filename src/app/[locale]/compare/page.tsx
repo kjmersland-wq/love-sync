@@ -13,6 +13,7 @@ import {
   Maximize2, BatteryCharging, ShieldCheck, ArrowRight, Eye, Sparkles 
 } from 'lucide-react';
 import Link from 'next/link';
+import { PremiumLockOverlay } from '../../../components/relationship/PremiumLockOverlay';
 
 interface PageProps {
   params: Promise<{ locale: string }>;
@@ -41,8 +42,13 @@ function ComparePortal({ locale }: { locale: string }) {
     toggleCompareProperty,
     comparedCities,
     toggleCompareCity,
-    calculatePropertyMatchScore
+    calculatePropertyMatchScore,
+    userProfile
   } = useApp();
+
+  if (userProfile.subscription !== 'Premium') {
+    return <PremiumLockOverlay featureKey="relocation" />;
+  }
 
   const [activeTab, setActiveTab] = useState<'properties' | 'cities'>('properties');
   
@@ -68,9 +74,9 @@ function ComparePortal({ locale }: { locale: string }) {
 
   // Load cities from query params or context
   useEffect(() => {
-    const c1 = searchParams.get('c1');
-    const c2 = searchParams.get('c2');
-    const c3 = searchParams.get('c3');
+    const c1 = searchParams?.get('c1');
+    const c2 = searchParams?.get('c2');
+    const c3 = searchParams?.get('c3');
 
     const initialSlugs: string[] = [];
     if (c1) initialSlugs.push(c1);

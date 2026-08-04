@@ -349,20 +349,107 @@ export const mockVerifications: VerificationRequest[] = [
 ];
 
 // Stub for legacy Next Place Living cost data
-export const getCostComparisonData = () => ({
-  averageRent: 0,
-  costOfLivingIndex: 0,
-  safetyIndex: 0,
-  neighborhoods: []
-});
+export const getCostComparisonData = (citySlug?: string) => [
+  { name: 'Apartment Rent (1 Bed)', category: 'Housing', osloPriceNok: 15000, localPriceNok: 8000 },
+  { name: 'Meal in Inexpensive Restaurant', category: 'Food', osloPriceNok: 220, localPriceNok: 100 },
+  { name: 'Monthly Public Transport Pass', category: 'Transport', osloPriceNok: 850, localPriceNok: 350 }
+];
 
 export const properties: any[] = [];
 export const cities: any[] = [];
 export const countries: any[] = [];
-export const exchangeRates = { USD: 1, EUR: 0.9, NOK: 10 };
-export const currencySymbols = { USD: '$', EUR: '€', NOK: 'kr' };
+export const exchangeRates: Record<string, number> = { USD: 1, EUR: 0.9, NOK: 10 };
+export const currencySymbols: Record<string, string> = { USD: '$', EUR: '€', NOK: 'kr' };
 
-export interface Country { id: string; name: string; slug: string; }
-export interface Neighborhood { id: string; name: string; slug: string; }
-export interface City { id: string; name: string; slug: string; country: string; neighborhoods: Neighborhood[]; }
-export interface Property { id: string; name: string; slug: string; price: number; bedrooms: number; type: string; city: string; neighborhood: string; evReady: boolean; parking: boolean; noiseRating: string; amenities: string[]; }
+export interface Country {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  visaGuideline: string;
+  residencyGuideline: string;
+  taxPolicy: string;
+  climateOverview: string;
+  image: string;
+  language: string;
+  currency: string;
+  exchangeRateToEur: number;
+}
+export interface Neighborhood {
+  id: string;
+  name: string;
+  slug: string;
+  coordinates: any;
+  safetyIndex: number;
+  walkabilityIndex: number;
+  greenSpacesIndex: number;
+  healthcareIndex: number;
+  diningIndex: number;
+  shoppingIndex: number;
+  retirementIndex: number;
+  description: string;
+  image: string;
+  noiseLevel: string;
+  costRating: string;
+  evCharging: string;
+  lifestyleProfile: string[];
+}
+export interface City {
+  id: string;
+  name: string;
+  slug: string;
+  country: string;
+  neighborhoods: Neighborhood[];
+  coordinates: any;
+  retirementScore: number;
+  description: string;
+  image: string;
+  safety: number;
+  costIndex: number;
+  healthcare: number;
+  climate: number;
+  walkability: number;
+  transit: number;
+  greenery: number;
+  taxScore: number;
+}
+export interface Property {
+  id: string;
+  name: string;
+  slug: string;
+  price: number;
+  bedrooms: number;
+  type: string;
+  city: string;
+  neighborhood: string;
+  evReady: boolean;
+  parking: boolean;
+  noiseRating: string;
+  amenities: string[];
+  title: string;
+  image: string;
+  exactAddress: string;
+  bathrooms: number;
+  size: number;
+  epcRating: string;
+  description: string;
+  currency: string;
+  coordinates: any;
+  commuteTimes: any;
+  evChargingStations: any;
+  listedDate: string;
+  provider: string;
+  priceHistory: any;
+  daysOnMarket: number;
+  estMarketValuePerSqm: number;
+  isAgency: boolean;
+  agencyLogo: string;
+  agencyName: string;
+  agencyContact: string;
+  agencyWebsite: string;
+  images: string[];
+  featured: boolean;
+  floor: number;
+  hasElevator: boolean;
+  commuteTimeTrainMin: number;
+}

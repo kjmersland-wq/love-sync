@@ -14,19 +14,55 @@ export const Navbar: React.FC = () => {
     userProfile,
     theme,
     toggleTheme,
-    chatThreads
+    chatThreads,
+    triggerModal
   } = useApp();
 
   const { locale, t, changeLanguage } = useI18n();
-  const pathname = usePathname();
+  const pathname = usePathname() || '';
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [billingLoading, setBillingLoading] = useState(false);
+
+  const handleLogout = () => {
+    document.cookie = "ls_user_id=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; SameSite=Lax; Secure";
+    triggerModal("Logged Out Successfully", "Your secure session has been terminated.", "success");
+    setMobileMenuOpen(false);
+    setTimeout(() => {
+      window.location.href = `/${locale}`;
+    }, 1200);
+  };
+
+  const handleAccountDetails = () => {
+    setMobileMenuOpen(false);
+    triggerModal(
+      t('policies.accountTitle'),
+      `${t('policies.accountBody')} | Profile Owner: ${userProfile.name || "Alex"}. Age: ${userProfile.age || 30}. Location: ${userProfile.location || "Oslo, Norway"}.`,
+      "info"
+    );
+  };
+
+  const handlePrivacyCheck = () => {
+    setMobileMenuOpen(false);
+    triggerModal(
+      t('policies.privacyTitle'),
+      t('policies.privacyBody'),
+      "success"
+    );
+  };
 
   const handleManageBilling = async () => {
     setBillingLoading(true);
     try {
       const res = await fetch("/api/paddle/portal");
-      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(`HTTP error ${res.status}`);
+      }
+      let data;
+      try {
+        data = await res.json();
+      } catch (e) {
+        throw new Error("Invalid JSON");
+      }
       if (data.success && data.portalUrl) {
         window.open(data.portalUrl, "_blank");
       } else {
@@ -130,7 +166,7 @@ export const Navbar: React.FC = () => {
                 : 'bg-muted border-border text-muted-foreground hover:bg-secondary'
             }`}
           >
-            {userProfile.subscription === 'Premium' ? 'Premium' : 'Free Tier'}
+            {userProfile.subscription === 'Premium' ? 'Premium' : 'Not Subscribed'}
           </Link>
 
           {/* Manage Billing (Premium only) */}
@@ -189,85 +225,162 @@ export const Navbar: React.FC = () => {
             <div className="space-y-4 px-4 py-6">
               {/* Navigation Links */}
               <div className="grid grid-cols-2 gap-3">
-                {navLinks.map((link) => {
-                  const isActive = isLinkActive(link.href);
-                  const Icon = link.icon;
-                  return (
-                    <Link
-                      key={link.name}
-                      href={link.href}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className={`relative flex flex-col items-center justify-center gap-2 rounded-xl border p-4 text-center transition-all ${
-                        isActive
-                          ? 'border-foreground bg-secondary text-foreground font-semibold'
-                          : 'border-border bg-background/50 text-muted-foreground'
-                      }`}
-                    >
-                      <Icon className="h-5 w-5 text-muted-foreground" />
-                      <span className="text-xs">{link.name}</span>
-                      {link.badge && (
-                        <span className="absolute top-2 right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[8px] font-bold text-white animate-pulse">
-                          {link.badge}
-                        </span>
-                      )}
-                    </Link>
-                  );
-                })}
+                {/* Home */}
+                <Link
+                  href={`/${locale}`}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex flex-col items-center justify-center gap-2 rounded-xl border border-border bg-background/50 p-4 text-center text-muted-foreground hover:text-foreground hover:border-foreground transition-all"
+                >
+                  <Heart className="h-5 w-5 text-red-500 fill-red-500/20" />
+                  <span className="text-xs font-semibold">Home</span>
+                </Link>
+
+                {/* Explore Matches */}
+                <Link
+                  href={`/${locale}/dashboard`}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`relative flex flex-col items-center justify-center gap-2 rounded-xl border p-4 text-center transition-all ${
+                    isLinkActive(`/${locale}/dashboard`)
+                      ? 'border-foreground bg-secondary text-foreground font-semibold'
+                      : 'border-border bg-background/50 text-muted-foreground'
+                  }`}
+                >
+                  <Heart className="h-5 w-5" />
+                  <span className="text-xs font-semibold">{t('nav.exploreMatches')}</span>
+                </Link>
+
+                {/* Messages */}
+                <Link
+                  href={`/${locale}/messages`}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`relative flex flex-col items-center justify-center gap-2 rounded-xl border p-4 text-center transition-all ${
+                    isLinkActive(`/${locale}/messages`)
+                      ? 'border-foreground bg-secondary text-foreground font-semibold'
+                      : 'border-border bg-background/50 text-muted-foreground'
+                  }`}
+                >
+                  <MessageSquare className="h-5 w-5" />
+                  <span className="text-xs font-semibold">{t('nav.messages')}</span>
+                  {unreadCount > 0 && (
+                    <span className="absolute top-2 right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[8px] font-bold text-white animate-pulse">
+                      {unreadCount}
+                    </span>
+                  )}
+                </Link>
+
+                {/* Premium (Pricing) */}
+                <Link
+                  href={`/${locale}/pricing`}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`relative flex flex-col items-center justify-center gap-2 rounded-xl border p-4 text-center transition-all ${
+                    isLinkActive(`/${locale}/pricing`)
+                      ? 'border-foreground bg-secondary text-foreground font-semibold'
+                      : 'border-border bg-background/50 text-muted-foreground'
+                  }`}
+                >
+                  <CreditCard className="h-5 w-5" />
+                  <span className="text-xs font-semibold">Premium</span>
+                </Link>
+
+                {/* Help */}
+                <Link
+                  href={`/${locale}/help`}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`relative flex flex-col items-center justify-center gap-2 rounded-xl border p-4 text-center transition-all ${
+                    isLinkActive(`/${locale}/help`)
+                      ? 'border-foreground bg-secondary text-foreground font-semibold'
+                      : 'border-border bg-background/50 text-muted-foreground'
+                  }`}
+                >
+                  <Settings className="h-5 w-5" />
+                  <span className="text-xs font-semibold">Help Center</span>
+                </Link>
+
+                {/* Account Details trigger */}
+                <button
+                  onClick={handleAccountDetails}
+                  className="flex flex-col items-center justify-center gap-2 rounded-xl border border-border bg-background/50 p-4 text-center text-muted-foreground hover:text-foreground transition-all"
+                >
+                  <ShieldCheck className="h-5 w-5 text-amber-500" />
+                  <span className="text-xs font-semibold">Account</span>
+                </button>
               </div>
 
               {/* Preferences Form */}
               <div className="border-t border-border pt-4 space-y-4">
+                {/* Theme toggle */}
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-foreground">{t('nav.themeLight')} / {t('nav.themeDark')}</span>
+                  <span className="text-xs font-semibold text-muted-foreground">Light / Dark</span>
                   <button 
                     onClick={toggleTheme}
-                    className="text-xs font-semibold px-3 py-1.5 rounded-lg border border-border bg-background"
+                    className="text-xs font-semibold px-3 py-1.5 rounded-lg border border-border bg-background hover:bg-secondary transition-colors"
                   >
-                    {theme === 'light' ? t('nav.themeDark') : t('nav.themeLight')}
+                    {theme === 'light' ? 'Dark Mode' : 'Light Mode'}
                   </button>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-foreground">Language</span>
-                  <Select
-                    options={languageOptions}
-                    value={locale}
-                    onChange={(val) => {
-                      changeLanguage(val as any);
-                      setMobileMenuOpen(false);
-                    }}
-                    className="w-44"
-                  />
+
+                {/* Language Select (Premium wrapping pills for mobile UX) */}
+                <div className="flex flex-col gap-2">
+                  <span className="text-xs font-semibold text-muted-foreground">Language</span>
+                  <div className="flex flex-wrap gap-2">
+                    {languageOptions.map((opt) => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => {
+                          changeLanguage(opt.value as any);
+                          setMobileMenuOpen(false);
+                        }}
+                        className={`py-1.5 px-3 text-xs font-semibold rounded-xl border transition-all ${
+                          locale === opt.value
+                            ? 'border-amber-500 bg-amber-500/10 text-amber-500'
+                            : 'border-border bg-background hover:bg-secondary text-foreground'
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
+
+                {/* GDPR & Privacy */}
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-foreground">Membership</span>
-                  <Link
-                    href={`/${locale}/pricing`}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={`text-xs font-semibold px-3 py-1.5 rounded-full border ${
-                      userProfile.subscription === 'Premium'
-                        ? 'bg-amber-500/10 border-amber-500/30 text-amber-500'
-                        : 'bg-muted border-border text-muted-foreground'
-                    }`}
+                  <span className="text-xs font-semibold text-muted-foreground">Privacy & GDPR</span>
+                  <button 
+                    onClick={handlePrivacyCheck}
+                    className="text-xs font-semibold px-3 py-1.5 rounded-lg border border-border bg-background hover:bg-secondary transition-colors"
                   >
-                    {userProfile.subscription === 'Premium' ? 'Premium Member' : 'Upgrade Account'}
-                  </Link>
+                    Check Compliance
+                  </button>
                 </div>
+
+                {/* Billing details (if premium) */}
                 {userProfile.subscription === 'Premium' && (
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-foreground">Billing Details</span>
+                    <span className="text-xs font-semibold text-muted-foreground">Billing Details</span>
                     <button
                       onClick={() => {
                         setMobileMenuOpen(false);
                         handleManageBilling();
                       }}
                       disabled={billingLoading}
-                      className="text-xs font-semibold px-3 py-1.5 rounded-lg border border-border bg-background flex items-center gap-1.5 disabled:opacity-50"
+                      className="text-xs font-semibold px-3 py-1.5 rounded-lg border border-border bg-background flex items-center gap-1.5 disabled:opacity-50 hover:bg-secondary transition-colors"
                     >
                       {billingLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Settings className="h-3 w-3" />}
                       <span>Manage Billing</span>
                     </button>
                   </div>
                 )}
+
+                {/* Logout Button */}
+                <div className="border-t border-border/40 pt-4">
+                  <button
+                    onClick={handleLogout}
+                    className="w-full py-2.5 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-500 font-bold rounded-xl text-xs transition-colors flex items-center justify-center gap-2"
+                  >
+                    Log Out Session
+                  </button>
+                </div>
               </div>
             </div>
           </motion.div>

@@ -3,11 +3,13 @@
 import React, { use, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { db } from '../../../lib/db';
+import { useApp } from '../../../context/AppContext';
 import { useI18n } from '../../../lib/i18n/I18nContext';
 import { getCanonicalSlug, getLocalizedSlug } from '../../../lib/i18n/i18n';
 import { Country, City } from '../../../data/mockDb';
 import Map from '../../../components/Map';
 import { Shield, HeartPulse, Landmark, BookOpen, Sun, ChevronRight } from 'lucide-react';
+import { PremiumLockOverlay } from '../../../components/relationship/PremiumLockOverlay';
 
 interface PageProps {
   params: Promise<{ locale: string; countrySlug: string }>;
@@ -16,7 +18,12 @@ interface PageProps {
 export default function CountryPortal({ params }: PageProps) {
   const { locale, t } = useI18n();
   const { countrySlug } = use(params);
+  const { userProfile } = useApp();
   
+  if (userProfile.subscription !== 'Premium') {
+    return <PremiumLockOverlay featureKey="relocation" />;
+  }
+
   const [country, setCountry] = useState<Country | null>(null);
   const [cities, setCities] = useState<City[]>([]);
   const [loading, setLoading] = useState(true);

@@ -1,22 +1,17 @@
 import { PaymentProvider, CheckoutSession, Invoice, WebhookEvent } from '../types';
 import { verifyPaddleWebhook } from '../crypto';
 import { getCloudflareContext } from '@opennextjs/cloudflare';
+import { validatePaddleConfig } from '../validation';
 
 function getPaddleConfig() {
-  try {
-    const context = getCloudflareContext();
-    if (context && context.env) {
-      return {
-        apiKey: context.env.PADDLE_API_KEY || process.env.PADDLE_API_KEY || '',
-        environment: context.env.PADDLE_ENVIRONMENT || context.env.NEXT_PUBLIC_PADDLE_ENVIRONMENT || process.env.PADDLE_ENVIRONMENT || process.env.NEXT_PUBLIC_PADDLE_ENVIRONMENT || 'sandbox'
-      };
-    }
-  } catch (e) {
-    // Outside worker context
+  const status = validatePaddleConfig();
+  if (!status.isValid) {
+    throw new Error(`[Paddle Config Validation Error] Missing required keys: ${status.missingKeys.join(', ')}`);
   }
   return {
-    apiKey: process.env.PADDLE_API_KEY || '',
-    environment: process.env.PADDLE_ENVIRONMENT || process.env.NEXT_PUBLIC_PADDLE_ENVIRONMENT || 'sandbox'
+    apiKey: status.values.apiKey,
+    environment: status.values.environment,
+    webhookSecret: status.values.webhookSecret
   };
 }
 
@@ -24,13 +19,8 @@ export class PaddleProvider implements PaymentProvider {
   name = 'paddle' as const;
 
   private getWebhookSecret(): string {
-    try {
-      const context = getCloudflareContext();
-      if (context && context.env && context.env.PADDLE_WEBHOOK_SECRET) {
-        return context.env.PADDLE_WEBHOOK_SECRET;
-      }
-    } catch (e) {}
-    return process.env.PADDLE_WEBHOOK_SECRET || 'pdl_webhook_sec_mock_12345';
+    const { webhookSecret } = getPaddleConfig();
+    return webhookSecret;
   }
 
   private getBaseUrl(environment: string): string {

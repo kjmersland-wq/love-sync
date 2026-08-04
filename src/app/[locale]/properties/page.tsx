@@ -11,6 +11,7 @@ import { DualSlider } from '../../../components/ui/Slider';
 import Select from '../../../components/ui/Select';
 import { Search, MapPin, BedDouble, Bath, Maximize2, Heart, ShieldAlert, List, Map as MapIcon, SlidersHorizontal, BatteryCharging, Star, GitCompare, RefreshCw, Eye } from 'lucide-react';
 import Link from 'next/link';
+import { PremiumLockOverlay } from '../../../components/relationship/PremiumLockOverlay';
 
 interface PageProps {
   params: Promise<{ locale: string }>;
@@ -42,13 +43,18 @@ function PropertiesSearch({ locale }: { locale: string }) {
     comparedProperties,
     watchlist,
     toggleWatchlist,
-    isInWatchlist
+    isInWatchlist,
+    userProfile
   } = useApp();
 
+  if (userProfile.subscription !== 'Premium') {
+    return <PremiumLockOverlay featureKey="relocation" />;
+  }
+
   // Load URL queries if any
-  const initialCity = searchParams.get('city') || 'all';
-  const initialNeighborhood = searchParams.get('neighborhood') || '';
-  const initialMaxPrice = searchParams.get('maxPrice') ? Number(searchParams.get('maxPrice')) : 2500000;
+  const initialCity = searchParams?.get('city') || 'all';
+  const initialNeighborhood = searchParams?.get('neighborhood') || '';
+  const initialMaxPrice = searchParams?.get('maxPrice') ? Number(searchParams.get('maxPrice')) : 2500000;
 
   // Filter States
   const [cityFilter, setCityFilter] = useState<string>(initialCity);
@@ -314,7 +320,7 @@ function PropertiesSearch({ locale }: { locale: string }) {
                 step={50000}
                 minValue={minPrice}
                 maxValue={maxPrice}
-                onChange={(min, max) => {
+                onChange={(min: number, max: number) => {
                   setMinPrice(min);
                   setMaxPrice(max);
                 }}
@@ -386,7 +392,7 @@ function PropertiesSearch({ locale }: { locale: string }) {
                     step={50000}
                     minValue={minPrice}
                     maxValue={maxPrice}
-                    onChange={(min, max) => {
+                    onChange={(min: number, max: number) => {
                       setMinPrice(min);
                       setMaxPrice(max);
                     }}

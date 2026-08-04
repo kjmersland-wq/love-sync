@@ -6,9 +6,17 @@ import { useI18n } from '../../../lib/i18n/I18nContext';
 import { RelationshipProfile, MessageItem } from '../../../data/mockDb';
 import { 
   Send, ShieldAlert, Sparkles, Languages, Image, 
-  MapPin, Check, CheckCheck, Smile, HelpCircle, Heart, MessageSquare
+  MapPin, Check, CheckCheck, Smile, HelpCircle, Heart, MessageSquare, Clock, Video, Info
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+
+// Relationship platform components
+import { RelationshipJourney } from '../../../components/relationship/RelationshipJourney';
+import { CouplesPlanning } from '../../../components/relationship/CouplesPlanning';
+import { CompatibilityAnalytics } from '../../../components/relationship/CompatibilityAnalytics';
+import { MediaPortal } from '../../../components/relationship/MediaPortal';
+import { SafetyCenter } from '../../../components/relationship/SafetyCenter';
+import { PremiumLockOverlay } from '../../../components/relationship/PremiumLockOverlay';
 
 export default function Messages() {
   const { locale, t } = useI18n();
@@ -21,11 +29,22 @@ export default function Messages() {
     translateMessage, 
     getConversationStarter, 
     isTyping,
-    calculateOverallScore 
+    calculateOverallScore,
+    triggerModal,
+    userProfile
   } = useApp();
 
+  if (userProfile.subscription !== 'Premium') {
+    return <PremiumLockOverlay featureKey="messages" />;
+  }
+
   const [inputText, setInputText] = useState('');
+  const [activeTab, setActiveTab] = useState<'chat' | 'journey' | 'planning' | 'analytics' | 'media' | 'safety'>('chat');
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    setActiveTab('chat');
+  }, [activeChatId]);
 
   // Active profile details
   const activeProfile = profiles.find(p => p.id === activeChatId) || null;
@@ -184,142 +203,229 @@ export default function Messages() {
                   </div>
                 </div>
 
-                {/* Safety Alert Banner */}
-                <div className="bg-amber-500/5 dark:bg-amber-500/10 border-b border-amber-500/10 px-4 py-2.5 flex items-start gap-2 text-amber-600 dark:text-amber-500 text-xs">
-                  <ShieldAlert className="h-4 w-4 shrink-0 mt-0.5" />
-                  <p className="font-light leading-relaxed">{t('messaging.safetyAlert')}</p>
+                {/* Relationship Workspace Tab Bar */}
+                <div className="flex border-b border-border/40 bg-secondary/10 overflow-x-auto text-[11px] font-semibold text-muted-foreground select-none shrink-0 scrollbar-none">
+                  <button
+                    onClick={() => setActiveTab('chat')}
+                    className={`px-4 py-2.5 transition-colors border-b-2 flex items-center gap-1 shrink-0 ${
+                      activeTab === 'chat' ? 'border-foreground text-foreground bg-secondary/20' : 'border-transparent hover:text-foreground'
+                    }`}
+                  >
+                    <MessageSquare className="h-3.5 w-3.5" />
+                    <span>Chat</span>
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('journey')}
+                    className={`px-4 py-2.5 transition-colors border-b-2 flex items-center gap-1 shrink-0 ${
+                      activeTab === 'journey' ? 'border-foreground text-foreground bg-secondary/20' : 'border-transparent hover:text-foreground'
+                    }`}
+                  >
+                    <Heart className="h-3.5 w-3.5" />
+                    <span>{t('relationshipPlatform.journeyTitle')}</span>
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('planning')}
+                    className={`px-4 py-2.5 transition-colors border-b-2 flex items-center gap-1 shrink-0 ${
+                      activeTab === 'planning' ? 'border-foreground text-foreground bg-secondary/20' : 'border-transparent hover:text-foreground'
+                    }`}
+                  >
+                    <MapPin className="h-3.5 w-3.5" />
+                    <span>{t('relationshipPlatform.planningTogether')}</span>
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('analytics')}
+                    className={`px-4 py-2.5 transition-colors border-b-2 flex items-center gap-1 shrink-0 ${
+                      activeTab === 'analytics' ? 'border-foreground text-foreground bg-secondary/20' : 'border-transparent hover:text-foreground'
+                    }`}
+                  >
+                    <Clock className="h-3.5 w-3.5" />
+                    <span>Compatibility & Trust</span>
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('media')}
+                    className={`px-4 py-2.5 transition-colors border-b-2 flex items-center gap-1 shrink-0 ${
+                      activeTab === 'media' ? 'border-foreground text-foreground bg-secondary/20' : 'border-transparent hover:text-foreground'
+                    }`}
+                  >
+                    <Video className="h-3.5 w-3.5" />
+                    <span>Media Portal</span>
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('safety')}
+                    className={`px-4 py-2.5 transition-colors border-b-2 flex items-center gap-1 shrink-0 ${
+                      activeTab === 'safety' ? 'border-foreground text-foreground bg-secondary/20' : 'border-transparent hover:text-foreground'
+                    }`}
+                  >
+                    <Info className="h-3.5 w-3.5" />
+                    <span>Safety Center</span>
+                  </button>
                 </div>
 
-                {/* Messages Body */}
-                <div className="flex-grow overflow-y-auto p-4 space-y-4">
-                  {currentMessages.length === 0 ? (
-                    <div className="h-full flex flex-col items-center justify-center text-center text-muted-foreground text-xs space-y-3 p-8">
-                      <Sparkles className="h-6 w-6 text-amber-500 animate-pulse" />
-                      <p>Start a quiet, meaningful chat. No pressure.</p>
-                      
-                      <button
-                        onClick={handleUseStarter}
-                        className="px-4 py-2 rounded-xl border border-border bg-card text-foreground hover:bg-secondary transition-all text-[11px] font-semibold flex items-center gap-1"
-                      >
-                        <HelpCircle className="h-3 w-3 text-red-500" />
-                        <span>{t('messaging.starterButton')}</span>
-                      </button>
+                {/* Tab content renders */}
+                {activeTab === 'chat' && (
+                  <>
+                    {/* Safety Alert Banner */}
+                    <div className="bg-amber-500/5 dark:bg-amber-500/10 border-b border-amber-500/10 px-4 py-2.5 flex items-start gap-2 text-amber-600 dark:text-amber-500 text-xs animate-fadeIn">
+                      <ShieldAlert className="h-4 w-4 shrink-0 mt-0.5" />
+                      <p className="font-light leading-relaxed">{t('messaging.safetyAlert')}</p>
                     </div>
-                  ) : (
-                    currentMessages.map((msg) => {
-                      const isMe = msg.senderId === 'user';
-                      return (
-                        <div
-                          key={msg.id}
-                          className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}
-                        >
-                          <div className="max-w-[75%] space-y-1">
-                            {/* Message box */}
-                            <div className={`px-4 py-2.5 rounded-2xl text-xs leading-relaxed ${
-                              isMe
-                                ? 'bg-foreground text-background rounded-tr-sm'
-                                : 'bg-secondary border border-border/40 text-foreground rounded-tl-sm'
-                            }`}>
-                              <p className="font-light">{msg.text}</p>
-                              
-                              {/* Translated block */}
-                              {msg.translatedText && (
-                                <p className="text-[10px] mt-1.5 pt-1.5 border-t border-border/40 italic font-mono text-muted-foreground">
-                                  {msg.translatedText}
-                                </p>
-                              )}
-                            </div>
 
-                            {/* Metadata */}
-                            <div className="flex items-center gap-1.5 text-[9px] text-muted-foreground px-1 select-none">
-                              <span>{formatTime(msg.timestamp)}</span>
-                              {!isMe && (
-                                <button 
-                                  onClick={() => translateMessage(activeProfile.id, msg.id)}
-                                  className="hover:text-foreground hover:underline flex items-center gap-0.5 font-semibold font-mono"
-                                >
-                                  <Languages className="h-2 w-2" />
-                                  <span>{msg.translatedText ? "Original" : t('messaging.translateToggle')}</span>
-                                </button>
-                              )}
-                              {isMe && (
-                                <span>
-                                  {msg.read ? (
-                                    <CheckCheck className="h-3 w-3 text-blue-500 inline" />
-                                  ) : (
-                                    <Check className="h-3 w-3 inline" />
+                    {/* Messages Body */}
+                    <div className="flex-grow overflow-y-auto p-4 space-y-4">
+                      {currentMessages.length === 0 ? (
+                        <div className="h-full flex flex-col items-center justify-center text-center text-muted-foreground text-xs space-y-3 p-8">
+                          <Sparkles className="h-6 w-6 text-amber-500 animate-pulse" />
+                          <p>Start a quiet, meaningful chat. No pressure.</p>
+                          
+                          <button
+                            onClick={handleUseStarter}
+                            className="px-4 py-2 rounded-xl border border-border bg-card text-foreground hover:bg-secondary transition-all text-[11px] font-semibold flex items-center gap-1"
+                          >
+                            <HelpCircle className="h-3 w-3 text-red-500" />
+                            <span>{t('messaging.starterButton')}</span>
+                          </button>
+                        </div>
+                      ) : (
+                        currentMessages.map((msg) => {
+                          const isMe = msg.senderId === 'user';
+                          return (
+                            <div
+                              key={msg.id}
+                              className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}
+                            >
+                              <div className="max-w-[75%] space-y-1">
+                                {/* Message box */}
+                                <div className={`px-4 py-2.5 rounded-2xl text-xs leading-relaxed ${
+                                  isMe
+                                    ? 'bg-foreground text-background rounded-tr-sm'
+                                    : 'bg-secondary border border-border/40 text-foreground rounded-tl-sm'
+                                }`}>
+                                  <p className="font-light">{msg.text}</p>
+                                  
+                                  {/* Translated block */}
+                                  {msg.translatedText && (
+                                    <p className="text-[10px] mt-1.5 pt-1.5 border-t border-border/40 italic font-mono text-muted-foreground">
+                                      {msg.translatedText}
+                                    </p>
                                   )}
-                                </span>
-                              )}
+                                </div>
+
+                                {/* Metadata */}
+                                <div className="flex items-center gap-1.5 text-[9px] text-muted-foreground px-1 select-none">
+                                  <span>{formatTime(msg.timestamp)}</span>
+                                  {!isMe && (
+                                    <button 
+                                      onClick={() => translateMessage(activeProfile.id, msg.id)}
+                                      className="hover:text-foreground hover:underline flex items-center gap-0.5 font-semibold font-mono"
+                                    >
+                                      <Languages className="h-2 w-2" />
+                                      <span>{msg.translatedText ? "Original" : t('messaging.translateToggle')}</span>
+                                    </button>
+                                  )}
+                                  {isMe && (
+                                    <span>
+                                      {msg.read ? (
+                                        <CheckCheck className="h-3 w-3 text-blue-500 inline" />
+                                      ) : (
+                                        <Check className="h-3 w-3 inline" />
+                                      )}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
+
+                      {/* Typing Indicator */}
+                      {isTyping[activeProfile.id] && (
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <div className="w-8 h-8 rounded-lg bg-secondary border border-border p-0.5 flex items-center justify-center shrink-0" dangerouslySetInnerHTML={{ __html: activeProfile.image }} />
+                          <div className="bg-secondary px-3.5 py-2 rounded-xl rounded-tl-sm border border-border/40 flex items-center gap-1.5">
+                            <span className="font-light">{activeProfile.name} is writing</span>
+                            <div className="flex gap-0.5 items-center">
+                              <div className="w-1 h-1 bg-muted-foreground rounded-full animate-bounce [animation-delay:0.1s]" />
+                              <div className="w-1 h-1 bg-muted-foreground rounded-full animate-bounce [animation-delay:0.2s]" />
+                              <div className="w-1 h-1 bg-muted-foreground rounded-full animate-bounce [animation-delay:0.3s]" />
                             </div>
                           </div>
                         </div>
-                      );
-                    })
-                  )}
+                      )}
 
-                  {/* Typing Indicator */}
-                  {isTyping[activeProfile.id] && (
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <div className="w-8 h-8 rounded-lg bg-secondary border border-border p-0.5 flex items-center justify-center shrink-0" dangerouslySetInnerHTML={{ __html: activeProfile.image }} />
-                      <div className="bg-secondary px-3.5 py-2 rounded-xl rounded-tl-sm border border-border/40 flex items-center gap-1.5">
-                        <span className="font-light">{activeProfile.name} is writing</span>
-                        <div className="flex gap-0.5 items-center">
-                          <div className="w-1 h-1 bg-muted-foreground rounded-full animate-bounce [animation-delay:0.1s]" />
-                          <div className="w-1 h-1 bg-muted-foreground rounded-full animate-bounce [animation-delay:0.2s]" />
-                          <div className="w-1 h-1 bg-muted-foreground rounded-full animate-bounce [animation-delay:0.3s]" />
-                        </div>
-                      </div>
+                      <div ref={messagesEndRef} />
                     </div>
-                  )}
 
-                  <div ref={messagesEndRef} />
-                </div>
+                    {/* Suggestions and Starters bar */}
+                    {currentMessages.length > 0 && (
+                      <div className="px-4 py-2 border-t border-border/40 bg-secondary/10 flex items-center justify-between text-xs text-muted-foreground shrink-0 select-none">
+                        <span className="flex items-center gap-1 text-[11px]">
+                          <Sparkles className="h-3.5 w-3.5 text-amber-500 fill-amber-500/20" />
+                          <span>Stuck? Try a compatibility starter</span>
+                        </span>
+                        <button
+                          onClick={handleUseStarter}
+                          className="px-2.5 py-1 text-[10px] font-semibold border border-border rounded-lg bg-background hover:bg-secondary transition-colors text-foreground"
+                        >
+                          Use Suggestion
+                        </button>
+                      </div>
+                    )}
 
-                {/* Suggestions and Starters bar */}
-                {currentMessages.length > 0 && (
-                  <div className="px-4 py-2 border-t border-border/40 bg-secondary/10 flex items-center justify-between text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1 text-[11px]">
-                      <Sparkles className="h-3.5 w-3.5 text-amber-500 fill-amber-500/20" />
-                      <span>Stuck? Try a compatibility starter</span>
-                    </span>
-                    <button
-                      onClick={handleUseStarter}
-                      className="px-2.5 py-1 text-[10px] font-semibold border border-border rounded-lg bg-background hover:bg-secondary transition-colors text-foreground"
-                    >
-                      Use Suggestion
-                    </button>
-                  </div>
+                    {/* Chat Footer / Input Form */}
+                    <form onSubmit={handleSend} className="p-4 border-t border-border/40 bg-secondary/20 flex gap-2 items-center shrink-0">
+                      {/* Mock image sharing button */}
+                      <button 
+                        type="button" 
+                        onClick={() => triggerModal(
+                          "Cloudflare R2 Image Upload",
+                          "File picker active. Under our v1.0 architecture, user media images are stored in a private Cloudflare R2 bucket with automated AES-256 edge-level key encryption to enforce GDPR conformity.",
+                          "info"
+                        )}
+                        className="p-2.5 rounded-xl border border-border hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
+                        title="Share private image (R2 encrypted)"
+                      >
+                        <Image className="h-4 w-4" />
+                      </button>
+
+                      <input
+                        type="text"
+                        value={inputText}
+                        onChange={(e) => setInputText(e.target.value)}
+                        placeholder={t('messaging.typePlaceholder')}
+                        className="flex-grow bg-background border border-border px-4 py-2.5 text-xs rounded-xl focus:outline-none focus:border-foreground transition-colors"
+                      />
+
+                      <button
+                        type="submit"
+                        disabled={!inputText.trim()}
+                        className="p-2.5 rounded-xl bg-foreground text-background hover:bg-foreground/90 disabled:opacity-40 disabled:hover:bg-foreground transition-colors flex items-center justify-center shadow"
+                      >
+                        <Send className="h-4 w-4" />
+                      </button>
+                    </form>
+                  </>
                 )}
 
-                {/* Chat Footer / Input Form */}
-                <form onSubmit={handleSend} className="p-4 border-t border-border/40 bg-secondary/20 flex gap-2 items-center">
-                  {/* Mock image sharing button */}
-                  <button 
-                    type="button" 
-                    onClick={() => alert("Cloudflare R2 Image Upload simulator: file picker active. Images are stored securely on R2 buckets with private encryption keying.")}
-                    className="p-2.5 rounded-xl border border-border hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
-                    title="Share private image (R2 encrypted)"
-                  >
-                    <Image className="h-4 w-4" />
-                  </button>
+                {activeTab === 'journey' && (
+                  <RelationshipJourney activeProfile={activeProfile} locale={locale} />
+                )}
 
-                  <input
-                    type="text"
-                    value={inputText}
-                    onChange={(e) => setInputText(e.target.value)}
-                    placeholder={t('messaging.typePlaceholder')}
-                    className="flex-grow bg-background border border-border px-4 py-2.5 text-xs rounded-xl focus:outline-none focus:border-foreground transition-colors"
-                  />
+                {activeTab === 'planning' && (
+                  <CouplesPlanning activeProfile={activeProfile} locale={locale} />
+                )}
 
-                  <button
-                    type="submit"
-                    disabled={!inputText.trim()}
-                    className="p-2.5 rounded-xl bg-foreground text-background hover:bg-foreground/90 disabled:opacity-40 disabled:hover:bg-foreground transition-colors flex items-center justify-center shadow"
-                  >
-                    <Send className="h-4 w-4" />
-                  </button>
-                </form>
+                {activeTab === 'analytics' && (
+                  <CompatibilityAnalytics activeProfile={activeProfile} locale={locale} />
+                )}
+
+                {activeTab === 'media' && (
+                  <MediaPortal activeProfile={activeProfile} locale={locale} />
+                )}
+
+                {activeTab === 'safety' && (
+                  <SafetyCenter activeProfile={activeProfile} locale={locale} />
+                )}
               </motion.div>
             ) : (
               <div className="h-full flex flex-col items-center justify-center text-center text-muted-foreground p-12">

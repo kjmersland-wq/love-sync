@@ -33,7 +33,7 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // 2. Feature Gating for Premium-only routes
-  const premiumRoutes = ["/compare", "/messages", "/properties", "/property"];
+  const premiumRoutes = ["/compare", "/messages", "/properties", "/property", "/dashboard", "/onboarding", "/verify", "/admin"];
   const isPremiumRoute = premiumRoutes.some((route) => pathname.includes(route));
 
   if (isPremiumRoute) {

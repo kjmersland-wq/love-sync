@@ -10,6 +10,7 @@ import { City, Neighborhood, Property, countries } from '../../../../../data/moc
 import Map from '../../../../../components/Map';
 import Slider from '../../../../../components/ui/Slider';
 import { Shield, HeartPulse, Trees, Footprints, Train, Volume2, DollarSign, Building, BedDouble, Bath, Maximize2, Heart, ArrowLeft, Sliders, MapPin } from 'lucide-react';
+import { PremiumLockOverlay } from '../../../../../components/relationship/PremiumLockOverlay';
 
 interface PageProps {
   params: Promise<{ locale: string; countrySlug: string; citySlug: string; neighborhoodSlug: string }>;
@@ -25,8 +26,13 @@ export default function NeighborhoodPortal({ params }: PageProps) {
     isFavorite,
     neighborhoodWeights,
     updateNeighborhoodWeight,
-    calculateNeighborhoodMatchScore
+    calculateNeighborhoodMatchScore,
+    userProfile
   } = useApp();
+
+  if (userProfile.subscription !== 'Premium') {
+    return <PremiumLockOverlay featureKey="relocation" />;
+  }
 
   const [city, setCity] = useState<City | null>(null);
   const [neighborhood, setNeighborhood] = useState<Neighborhood | null>(null);
@@ -310,7 +316,7 @@ export default function NeighborhoodPortal({ params }: PageProps) {
               <div className="space-y-1.5 pt-1">
                 <span className="text-muted-foreground block font-semibold uppercase text-[9px] tracking-wider">{t('neighborhoodPortal.lifestyleProfile')}</span>
                 <div className="flex flex-wrap gap-1">
-                  {neighborhood.lifestyleProfile.map(tag => (
+                  {neighborhood.lifestyleProfile.map((tag: string) => (
                     <span key={tag} className="text-[10px] bg-secondary/80 text-muted-foreground px-2 py-1 rounded">
                       {tag}
                     </span>

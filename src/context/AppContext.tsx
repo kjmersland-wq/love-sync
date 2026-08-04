@@ -14,6 +14,7 @@ import {
 } from '../data/mockDb';
 import { paymentService } from '../lib/payments/paymentService';
 import { PaymentProviderName, Invoice, WebhookEventType } from '../lib/payments/types';
+import { PremiumModal } from '../components/PremiumModal';
 
 export interface MatchingWeights {
   familyGoals: number;
@@ -35,7 +36,7 @@ interface AppContextType {
     age: number;
     gender: string;
     location: string;
-    subscription: 'Free' | 'Premium';
+    subscription: 'Not Subscribed' | 'Premium';
     verification: VerificationStatus;
   };
   upgradeSubscription: (planId?: string, amount?: number) => Promise<{ transactionId: string; checkoutUrl: string }>;
@@ -77,6 +78,26 @@ interface AppContextType {
     dbOps: number;
     r2Bytes: number;
   };
+  triggerModal: (title: string, description: string, type?: 'info' | 'error' | 'success' | 'warning') => void;
+
+  // Legacy stubs
+  formatPrice: (price: number, currency: string) => string;
+  toggleFavorite: (typeOrId: string, id?: string) => void;
+  isFavorite: (typeOrId: string, id?: string) => boolean;
+  calculatePropertyMatchScore: (property: any) => number;
+  toggleCompareProperty: (propertyId: string) => void;
+  comparedProperties: string[];
+  watchlist: string[];
+  toggleWatchlist: (id: string) => void;
+  isInWatchlist: (id: string) => boolean;
+  propertyWeights: any;
+  updatePropertyWeight: (key: string, val: number) => void;
+  budgetLimit: number;
+  comparedCities: string[];
+  toggleCompareCity: (cityId: string) => void;
+  neighborhoodWeights: any;
+  updateNeighborhoodWeight: (key: string, val: number) => void;
+  calculateNeighborhoodMatchScore: (neighborhood: any) => number;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -88,16 +109,36 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     age: number;
     gender: string;
     location: string;
-    subscription: 'Free' | 'Premium';
+    subscription: 'Not Subscribed' | 'Premium';
     verification: VerificationStatus;
   }>({
     name: "Alex",
     age: 30,
     gender: "Male",
     location: "Oslo, Norway",
-    subscription: "Free",
+    subscription: "Not Subscribed",
     verification: { email: true, phone: false, photo: false, id: false }
   });
+
+  const [modalConfig, setModalConfig] = useState<{
+    isOpen: boolean;
+    title: string;
+    description: string;
+    type: 'info' | 'error' | 'success' | 'warning';
+  }>({
+    isOpen: false,
+    title: '',
+    description: '',
+    type: 'info'
+  });
+
+  const triggerModal = (
+    title: string,
+    description: string,
+    type: 'info' | 'error' | 'success' | 'warning' = 'info'
+  ) => {
+    setModalConfig({ isOpen: true, title, description, type });
+  };
 
   const [activePaymentProvider, setActivePaymentProviderState] = useState<PaymentProviderName>('paddle');
   const [invoices, setInvoices] = useState<Invoice[]>([]);
@@ -155,7 +196,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 age: data.profile.age || 30,
                 gender: data.profile.gender || "Male",
                 location: data.profile.location || "Oslo, Norway",
-                subscription: data.profile.subscription || "Free",
+                subscription: data.profile.subscription || "Not Subscribed",
                 verification: { email: true, phone: false, photo: false, id: false }
               };
               setUserProfile(syncedProfile);
@@ -238,7 +279,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       body: JSON.stringify({ planId, amount })
     });
     
-    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(`HTTP error ${res.status}: Failed to create checkout session`);
+    }
+
+    let data;
+    try {
+      data = await res.json();
+    } catch (e) {
+      throw new Error("Invalid server response format (expected JSON, received HTML/text)");
+    }
+
     if (!data.success) {
       throw new Error(data.error || "Failed to create checkout session");
     }
@@ -252,7 +303,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const cancelActiveSubscription = async () => {
     const res = await fetch("/api/paddle/cancel", { method: "POST" });
-    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(`HTTP error ${res.status}: Failed to cancel subscription`);
+    }
+
+    let data;
+    try {
+      data = await res.json();
+    } catch (e) {
+      throw new Error("Invalid server response format (expected JSON, received HTML/text)");
+    }
+
     if (!data.success) {
       throw new Error(data.error || "Failed to cancel subscription");
     }
@@ -370,7 +431,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           setInvoices(prev => [newInvoice, ...prev]);
         } else if (normalizedEvent.type === 'subscription.cancelled') {
           setUserProfile(prev => {
-            const nextProfile = { ...prev, subscription: 'Free' as const };
+            const nextProfile = { ...prev, subscription: 'Not Subscribed' as const };
             localStorage.setItem('ls_user_profile', JSON.stringify(nextProfile));
             return nextProfile;
           });
@@ -383,8 +444,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }));
       })
       .catch(err => {
-        PaymentLogger.warn(`[Admin Webhook Simulation Catch] ${err.message}`);
-        alert(`[Deduplication Active] Webhook event rejected: ${err.message}`);
+        console.warn(`[Admin Webhook Simulation Catch] ${err.message}`);
+        triggerModal(
+          "Webhook Event Rejected",
+          `Event simulation rejected by the payments layer logic: ${err.message}`,
+          "warning"
+        );
       });
   };
 
@@ -416,16 +481,36 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const totalWeights = Object.values(weights).reduce((a, b) => a + b, 0);
     if (totalWeights === 0) return 0;
 
-    let weightedSum = 0;
-    weightedSum += weights.familyGoals * profile.categories.familyGoals;
-    weightedSum += weights.lifestyle * profile.categories.lifestyle;
-    weightedSum += weights.personality * profile.categories.personality;
-    weightedSum += weights.values * profile.categories.values;
-    weightedSum += weights.interests * profile.categories.interests;
-    weightedSum += weights.distance * profile.categories.distance;
-    weightedSum += weights.age * profile.categories.age;
+    // 1. Weighted Euclidean Compatibility (penalizes large single-attribute gaps)
+    let weightedSquaredDiff = 0;
+    const fields: Array<keyof MatchingWeights> = ['familyGoals', 'lifestyle', 'personality', 'values', 'interests', 'distance', 'age'];
+    
+    for (const field of fields) {
+      const uWeight = weights[field];
+      const vScore = profile.categories[field] || 0;
+      weightedSquaredDiff += uWeight * Math.pow(100 - vScore, 2);
+    }
+    
+    const meanSquaredDiff = weightedSquaredDiff / totalWeights;
+    const euclideanCompatibility = 100 - Math.sqrt(meanSquaredDiff);
 
-    return Math.round(weightedSum / totalWeights);
+    // 2. Exponential Geographic Distance Decay
+    const distanceKm = profile.distanceKm || 0;
+    const distanceDecay = Math.exp(-distanceKm / 8000);
+
+    // 3. Trust & Verification Multiplier (+2.5% per verified badge up to +10%)
+    let verifiedCount = 0;
+    if (profile.verification) {
+      if (profile.verification.email) verifiedCount++;
+      if (profile.verification.phone) verifiedCount++;
+      if (profile.verification.photo) verifiedCount++;
+      if (profile.verification.id) verifiedCount++;
+    }
+    const trustMultiplier = 1.0 + (0.025 * verifiedCount);
+
+    // 4. Combined Score Bounds Mapping
+    const finalScore = Math.round(euclideanCompatibility * distanceDecay * trustMultiplier);
+    return Math.max(0, Math.min(100, finalScore));
   };
 
   const toggleSaveProfile = (profileId: string) => {
@@ -615,9 +700,34 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       verificationsQueue,
       resolveReport,
       approveVerification,
-      systemMetrics
+      systemMetrics,
+      triggerModal,
+      formatPrice: (price: number, currency: string) => `${currency === 'PLN' ? 'zł' : currency === 'NOK' ? 'kr' : '$'}${price}`,
+      toggleFavorite: () => {},
+      isFavorite: () => false,
+      calculatePropertyMatchScore: () => 85,
+      toggleCompareProperty: () => {},
+      comparedProperties: [],
+      watchlist: [],
+      toggleWatchlist: () => {},
+      isInWatchlist: () => false,
+      propertyWeights: { garage: 5, ev: 5, elevator: 5, transit: 5, floor: 5 },
+      updatePropertyWeight: () => {},
+      budgetLimit: 1000000,
+      comparedCities: [],
+      toggleCompareCity: () => {},
+      neighborhoodWeights: { safety: 5, walkability: 5, greenery: 5, healthcare: 5, dining: 5, shopping: 5, retirement: 5 },
+      updateNeighborhoodWeight: () => {},
+      calculateNeighborhoodMatchScore: () => 85
     }}>
       {children}
+      <PremiumModal
+        isOpen={modalConfig.isOpen}
+        onClose={() => setModalConfig((prev) => ({ ...prev, isOpen: false }))}
+        title={modalConfig.title}
+        description={modalConfig.description}
+        type={modalConfig.type}
+      />
     </AppContext.Provider>
   );
 };

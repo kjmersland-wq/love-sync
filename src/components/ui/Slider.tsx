@@ -1,15 +1,22 @@
 import React from 'react';
 
-// Named exports for components importing { Slider } or { DualSlider }
-export function Slider() {
+interface SliderProps {
+  min?: number;
+  max?: number;
+  step?: number;
+  value?: any;
+  onChange?: (val: any) => void;
+  className?: string;
+}
+
+export function Slider(props: SliderProps) {
   return null;
 }
 
-export function DualSlider() {
+export function DualSlider(props: any) {
   return null;
 }
 
-// Default export placeholder
-export default function DefaultSlider() {
+export default function DefaultSlider(props: SliderProps) {
   return null;
 }

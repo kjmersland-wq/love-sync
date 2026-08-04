@@ -9,6 +9,7 @@ import { getCanonicalSlug, getLocalizedSlug } from '../../../../lib/i18n/i18n';
 import { City, Neighborhood, getCostComparisonData } from '../../../../data/mockDb';
 import Map from '../../../../components/Map';
 import { Shield, HeartPulse, Sun, MapPin, Star, GitCompare, Building, Trees, Footprints, Train, Volume2, DollarSign, ChevronRight } from 'lucide-react';
+import { PremiumLockOverlay } from '../../../../components/relationship/PremiumLockOverlay';
 
 interface PageProps {
   params: Promise<{ locale: string; countrySlug: string; citySlug: string }>;
@@ -24,8 +25,13 @@ export default function CityPortal({ params }: PageProps) {
     toggleCompareCity, 
     comparedCities, 
     formatPrice,
-    calculateNeighborhoodMatchScore
+    calculateNeighborhoodMatchScore,
+    userProfile
   } = useApp();
+
+  if (userProfile.subscription !== 'Premium') {
+    return <PremiumLockOverlay featureKey="relocation" />;
+  }
 
   const [city, setCity] = useState<City | null>(null);
   const [loading, setLoading] = useState(true);
@@ -354,7 +360,7 @@ export default function CityPortal({ params }: PageProps) {
                         
                         {/* Lifestyle tags */}
                         <div className="flex flex-wrap gap-1.5 pt-2">
-                          {selectedNeighborhood.lifestyleProfile.map(tag => (
+                          {selectedNeighborhood.lifestyleProfile.map((tag: string) => (
                             <span key={tag} className="text-[10px] bg-secondary/80 text-muted-foreground px-2 py-1 rounded">
                               {tag}
                             </span>
@@ -417,7 +423,7 @@ export default function CityPortal({ params }: PageProps) {
 
               {/* Cost items listing */}
               <div className="space-y-4">
-                {costComparison.map((item) => {
+                {costComparison.map((item: any) => {
                   const percentageDiff = Math.round(((item.osloPriceNok - item.localPriceNok) / item.osloPriceNok) * 100);
                   return (
                     <div key={item.name} className="grid grid-cols-1 md:grid-cols-3 items-center gap-4 py-3 border-b border-border/40 last:border-0 text-sm">

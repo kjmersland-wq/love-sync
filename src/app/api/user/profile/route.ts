@@ -36,7 +36,7 @@ export async function GET(request: Request) {
         id: user.id,
         email: user.email,
         name: user.name,
-        subscription: user.subscription, // 'Free' or 'Premium'
+        subscription: user.subscription === 'Free' ? 'Not Subscribed' : user.subscription, // 'Not Subscribed' or 'Premium'
         paddleCustomerId: user.paddle_customer_id,
         paddleSubscriptionId: user.paddle_subscription_id,
         paddleBillingStatus: user.paddle_billing_status,

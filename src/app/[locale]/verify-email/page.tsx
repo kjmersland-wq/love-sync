@@ -4,7 +4,7 @@ import React, { useState, use } from 'react';
 import Link from 'next/link';
 import { useI18n } from '../../../lib/i18n/I18nContext';
 import AuthLayout from '../../../components/AuthLayout';
-import { Mail, RefreshCw, ArrowLeft, Loader2, CheckCircle2, ShieldCheck, Edit2, Check } from 'lucide-react';
+import { Mail, RefreshCw, ArrowLeft, Loader2, CheckCircle2, ShieldCheck, Edit2, Check, Heart } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface PageProps {

@@ -18,6 +18,7 @@ import {
   TrendingDown, Globe, Car, Info, InfoIcon, GitCompare
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { PremiumLockOverlay } from '../../../../components/relationship/PremiumLockOverlay';
 
 interface PageProps {
   params: Promise<{ locale: string; id: string }>;
@@ -39,8 +40,13 @@ export default function PropertyDetailsPage({ params }: PageProps) {
     calculatePropertyMatchScore,
     toggleCompareProperty,
     comparedProperties,
-    budgetLimit
+    budgetLimit,
+    userProfile
   } = useApp();
+
+  if (userProfile.subscription !== 'Premium') {
+    return <PremiumLockOverlay featureKey="relocation" />;
+  }
 
   const [property, setProperty] = useState<Property | null>(null);
   const [neighborhood, setNeighborhood] = useState<Neighborhood | null>(null);
@@ -205,7 +211,7 @@ export default function PropertyDetailsPage({ params }: PageProps) {
     });
   }
   if (showEvMarkers) {
-    property.evChargingStations.forEach((station, index) => {
+    property.evChargingStations.forEach((station: any, index: number) => {
       // Offset slightly for display
       const offsetLat = lat + (index === 0 ? 0.0015 : -0.002);
       const offsetLng = lng + (index === 0 ? -0.0018 : 0.0022);
@@ -686,7 +692,7 @@ export default function PropertyDetailsPage({ params }: PageProps) {
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {property.evChargingStations.map((station, idx) => (
+              {property.evChargingStations.map((station: any, idx: number) => (
                 <div key={idx} className="border border-border/60 bg-secondary/10 rounded-xl p-4 space-y-2 text-xs">
                   <div className="flex justify-between font-bold">
                     <span className="text-foreground">{station.name}</span>
@@ -720,7 +726,7 @@ export default function PropertyDetailsPage({ params }: PageProps) {
               </div>
 
               {/* Price drops if any */}
-              {property.priceHistory.filter(h => h.event !== 'Listed').map((hist, idx) => (
+              {property.priceHistory.filter((h: any) => h.event !== 'Listed').map((hist: any, idx: number) => (
                 <div key={idx} className="relative">
                   <span className="absolute -left-[31px] top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 text-[9px] font-bold text-white">↓</span>
                   <div className="space-y-1">

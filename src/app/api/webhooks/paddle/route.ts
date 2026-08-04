@@ -85,11 +85,11 @@ export async function POST(request: Request) {
 
         // Upgrade status rules
         const isPremium = subStatus === "active" || subStatus === "trialing";
-        const subscriptionState = isPremium ? "Premium" : "Free";
+        const subscriptionState: "Premium" | "Not Subscribed" = isPremium ? "Premium" : "Not Subscribed";
 
         if (userId !== "unknown_user") {
           await db.updateUserSubscription(userId, {
-            subscription: subscriptionState,
+            subscription: subscriptionState as any,
             paddleCustomerId: customerId,
             paddleSubscriptionId: subscriptionId,
             paddleBillingStatus: subStatus,
@@ -109,17 +109,17 @@ export async function POST(request: Request) {
         const planId = data.items?.[0]?.price?.id || null;
 
         // If subscription is past due or cancelled, immediately downgrade or set status
-        // In some setups past_due might have a grace period, here we immediately set to Free to enforce billing
+        // In some setups past_due might have a grace period, here we immediately set to Not Subscribed to enforce billing
         if (userId !== "unknown_user") {
           await db.updateUserSubscription(userId, {
-            subscription: "Free",
+            subscription: "Not Subscribed",
             paddleCustomerId: customerId,
             paddleSubscriptionId: subscriptionId,
             paddleBillingStatus: subStatus,
             paddleRenewalDate: null,
             paddlePlanId: planId
           });
-          console.log(`[Paddle Webhook Downgrade] Downgraded user ${userId} to Free (status: ${subStatus})`);
+          console.log(`[Paddle Webhook Downgrade] Downgraded user ${userId} to Not Subscribed (status: ${subStatus})`);
         }
         break;
       }

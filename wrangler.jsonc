@@ -13,8 +13,8 @@
   "vars": {
     "NEXT_PUBLIC_TURNSTILE_SITEKEY": "3x00000000000000000000FF", // Mock testing sitekey
     "NEXT_PUBLIC_ACTIVE_PAYMENT_PROVIDER": "paddle",
-    "NEXT_PUBLIC_PADDLE_ENVIRONMENT": "sandbox",
-    "NEXT_PUBLIC_PADDLE_CLIENT_TOKEN": "",
+    "NEXT_PUBLIC_PADDLE_ENVIRONMENT": "production",
+    "NEXT_PUBLIC_PADDLE_CLIENT_TOKEN": "live_a0cf0be4069f975bf53bdb7c002",
     
     // Feature Flags default values
     "NEXT_PUBLIC_FEAT_AI_FEATURES": "false",

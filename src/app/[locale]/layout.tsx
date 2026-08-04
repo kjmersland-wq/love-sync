@@ -32,20 +32,47 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     en: "Love Sync — Premium International Connections",
     no: "Love Sync — Premium internasjonale forbindelser",
     pl: "Love Sync — Elitarne znajomości międzynarodowe",
+    de: "Love Sync — Premium Internationale Beziehungen",
+    fr: "Love Sync — Connexions Internationales Premium",
+    es: "Love Sync — Conexiones Internacionales Premium",
+    it: "Love Sync — Connessioni Internazionali Premium",
   };
 
   const descriptions = {
     en: "Connect across borders, match by values and lifestyle, and translate messages in real-time. Premium relationship discovery.",
     no: "Koble sammen på tvers av grenser, match basert på verdier og livsstil, og oversett meldinger i sanntid. Førsteklasses relasjonsplanlegger.",
     pl: "Nawiąż relacje ponad granicami, dopasuj się pod kątem wartości i stylu życia oraz tłumacz wiadomości w czasie rzeczywistym.",
+    de: "Verbinden Sie sich über Grenzen hinweg, matchen Sie nach Werten und Lebensstil und übersetzen Sie Nachrichten in Echtzeit.",
+    fr: "Connectez-vous au-delà des frontières, matchez selon vos valeurs et votre style de vie, et traduisez les messages en temps réel.",
+    es: "Conéctese a través de las fronteras, empareje por valores y estilo de vida, y traduzca mensajes en tiempo real.",
+    it: "Connettiti oltre i confini, trova l'intesa ideale in base a valori e stile di vita, e traduci i messaggi in tempo reale.",
   };
 
   return {
     metadataBase: new URL("https://www.love-sync.com"),
     title: titles[locale as keyof typeof titles] || titles.en,
     description: descriptions[locale as keyof typeof descriptions] || descriptions.en,
+    keywords: ["international relationship", "compatibility matching", "expat dating", "cross-border relationships", "relocation planning"],
+    manifest: "/site.webmanifest",
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: "default",
+      title: "Love Sync",
+    },
     icons: {
-      icon: "/favicon.ico",
+      icon: [
+        { url: "/favicon.ico" },
+        { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+        { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+        { url: "/favicon-48x48.png", sizes: "48x48", type: "image/png" }
+      ],
+      apple: [
+        { url: "/apple-touch-icon.png" },
+        { url: "/apple-touch-icon-180.png", sizes: "180x180", type: "image/png" }
+      ],
+      other: [
+        { rel: "mask-icon", url: "/mask-icon.svg", color: "#09090b" }
+      ]
     },
     alternates: {
       canonical: `/${locale}`,
@@ -66,7 +93,21 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       siteName: "Love Sync",
       locale: locale,
       type: "website",
+      images: [
+        {
+          url: "/og-image.png",
+          width: 1200,
+          height: 630,
+          alt: "Love-Sync Premium International Relationships"
+        }
+      ]
     },
+    twitter: {
+      card: "summary_large_image",
+      title: titles[locale as keyof typeof titles] || titles.en,
+      description: descriptions[locale as keyof typeof descriptions] || descriptions.en,
+      images: ["/twitter-image.png"],
+    }
   };
 }
 

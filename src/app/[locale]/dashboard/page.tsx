@@ -123,7 +123,20 @@ export default function Dashboard() {
         <div className="lg:col-span-4 space-y-6">
           
           {/* Sliders Configuration */}
-          <div className="bg-card border border-border/60 rounded-2xl p-6 shadow-sm space-y-6">
+          <div className="bg-card border border-border/60 rounded-2xl p-6 shadow-sm space-y-6 relative overflow-hidden">
+            {userProfile.subscription !== 'Premium' && (
+              <div className="absolute inset-0 z-10 bg-background/80 backdrop-blur-[1px] flex flex-col items-center justify-center p-4 text-center">
+                <Sparkles className="h-5 w-5 text-amber-500 mb-2" />
+                <span className="text-xs font-bold text-foreground">Advanced Weight Customization</span>
+                <span className="text-[10px] text-muted-foreground mt-1 max-w-[200px]">Tune match weight priorities to fit your expectations.</span>
+                <button
+                  onClick={() => router.push(`/${locale}/pricing`)}
+                  className="mt-3 px-3.5 py-1.5 bg-amber-500 text-white font-semibold rounded-xl text-[10px] hover:bg-amber-600 transition-colors shadow shadow-amber-500/10"
+                >
+                  Unlock Match Tuning
+                </button>
+              </div>
+            )}
             <div className="flex items-center gap-2 border-b border-border/40 pb-3">
               <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
               <h2 className="text-sm font-semibold text-foreground">{t('dashboard.weightConfig')}</h2>

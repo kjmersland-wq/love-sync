@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { Heart, ShieldCheck } from 'lucide-react';
+import { useApp } from '../context/AppContext';
 
 interface AuthLayoutProps {
   locale: string;
@@ -27,6 +28,7 @@ export default function AuthLayout({
   helpText,
   children
 }: AuthLayoutProps) {
+  const { triggerModal } = useApp();
   return (
     <div className="min-h-screen bg-background flex flex-col justify-center py-16 sm:px-6 lg:px-8 relative overflow-hidden text-foreground">
       
@@ -82,7 +84,20 @@ export default function AuthLayout({
             ) : (
               <Link href={`/${locale}/help`} className="hover:text-foreground transition-colors underline">Need assistance?</Link>
             )}
-            <a href="#" onClick={(e) => { e.preventDefault(); alert("GDPR Data Protection is fully operational. Secure logs are encrypted."); }} className="hover:text-foreground transition-colors underline">Privacy & GDPR</a>
+            <a
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                triggerModal(
+                  "GDPR & Data Protection Status",
+                  "Love-Sync complies fully with GDPR regulations. All user databases, media, and chat content are encrypted. We maintain zero tracking scripts or cookie networks.",
+                  "success"
+                );
+              }}
+              className="hover:text-foreground transition-colors underline"
+            >
+              Privacy & GDPR
+            </a>
           </div>
         </div>
 

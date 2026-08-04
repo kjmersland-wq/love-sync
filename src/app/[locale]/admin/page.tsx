@@ -182,7 +182,7 @@ export default function Admin() {
                       </td>
                       <td className="px-4 py-3 text-right">
                         <span className={`px-2 py-0.5 rounded-full font-semibold ${profile.verification.id ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20' : 'bg-secondary text-muted-foreground'}`}>
-                          {profile.verification.id ? 'Premium' : 'Free Tier'}
+                          {profile.verification.id ? 'Premium' : 'Not Subscribed'}
                         </span>
                       </td>
                     </tr>
