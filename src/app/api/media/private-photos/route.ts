@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { db } from "../../../../lib/db";
 
-export const runtime = "edge";
+
 
 export async function GET(request: Request) {
   try {

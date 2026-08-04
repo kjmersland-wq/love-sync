@@ -3,7 +3,7 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { verifyPaddleWebhook } from "../../../../lib/payments/crypto";
 import { db } from "../../../../lib/db";
 
-export const runtime = "edge";
+
 
 export async function POST(request: Request) {
   try {

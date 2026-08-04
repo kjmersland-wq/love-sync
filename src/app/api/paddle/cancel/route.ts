@@ -3,7 +3,7 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { db } from "../../../../lib/db";
 import { paymentService } from "../../../../lib/payments/paymentService";
 
-export const runtime = "edge";
+
 
 export async function POST(request: Request) {
   try {
