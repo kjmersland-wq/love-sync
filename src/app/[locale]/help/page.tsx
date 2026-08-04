@@ -1,7 +1,6 @@
 import React from 'react';
 import HelpClient from './HelpClient';
 
-export const runtime = "edge";
 
 interface PageProps {
   params: Promise<{ locale: string }>;

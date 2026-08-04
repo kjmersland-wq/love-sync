@@ -1,7 +1,6 @@
 import React from 'react';
 import PricingClient from './PricingClient';
 
-export const runtime = "edge";
 
 interface PageProps {
   params: Promise<{ locale: string }>;

@@ -2,7 +2,6 @@ import React, { use } from 'react';
 import FaqClient from './FaqClient';
 import { faqData } from '../../../lib/i18n/helpData';
 
-export const runtime = "edge";
 
 interface PageProps {
   params: Promise<{ locale: string }>;
