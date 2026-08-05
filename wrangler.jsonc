@@ -15,6 +15,9 @@
     "NEXT_PUBLIC_ACTIVE_PAYMENT_PROVIDER": "paddle",
     "NEXT_PUBLIC_PADDLE_ENVIRONMENT": "production",
     "NEXT_PUBLIC_PADDLE_CLIENT_TOKEN": "live_a0cf0be4069f975bf53bdb7c002",
+    "PADDLE_MONTHLY_PRICE_ID": "pri_01kz3ez63mzsfc416dyhx8exas",
+    "PADDLE_YEARLY_PRICE_ID": "pri_01kz3f9jx3x3yqzbxz9mgdf8yd",
+    "PADDLE_PRODUCT_ID": "pro_01kz3ejh5rzvt9hf0cy064kjyq",
     
     // Feature Flags default values
     "NEXT_PUBLIC_FEAT_AI_FEATURES": "false",
