@@ -12,7 +12,6 @@ import {
   SystemReport,
   VerificationRequest
 } from '../data/mockDb';
-import { paymentService } from '../lib/payments/paymentService';
 import { PaymentProviderName, Invoice, WebhookEventType } from '../lib/payments/types';
 import { PremiumModal } from '../components/PremiumModal';
 
@@ -172,6 +171,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Load from local storage and API on mount
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      // Auto-initialize demo user cookie if missing
+      if (!document.cookie.split(';').some((c) => c.trim().startsWith('ls_user_id='))) {
+        document.cookie = "ls_user_id=user_123; path=/; max-age=31536000; SameSite=Lax; Secure";
+      }
+
       // Theme
       const storedTheme = localStorage.getItem('ls_theme') as 'light' | 'dark' | null;
       if (storedTheme) {
@@ -240,16 +244,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           if (data.success) {
             setInvoices(data.invoices || []);
           } else {
-            const history = await paymentService.getInvoiceHistory('user_123', activePaymentProvider);
-            setInvoices(history);
+            console.warn("Failed to load invoices from API:", data.error);
+            setInvoices([]);
           }
         } else {
-          const history = await paymentService.getInvoiceHistory('user_123', activePaymentProvider);
-          setInvoices(history);
+          console.warn("Failed to fetch invoices: HTTP status", res.status);
+          setInvoices([]);
         }
       } catch (e) {
-        const history = await paymentService.getInvoiceHistory('user_123', activePaymentProvider);
-        setInvoices(history);
+        console.error("Error loading invoices:", e);
+        setInvoices([]);
       }
     };
     loadInvoices();
