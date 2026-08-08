@@ -11,7 +11,7 @@
     "binding": "ASSETS"
   },
   "vars": {
-    "NEXT_PUBLIC_TURNSTILE_SITEKEY": "3x00000000000000000000FF", // Mock testing sitekey
+    "NEXT_PUBLIC_TURNSTILE_SITEKEY": "0x4AAAAAAEKUW0ASL_zvv0nE",
     "NEXT_PUBLIC_ACTIVE_PAYMENT_PROVIDER": "stripe",
     
     // Stripe public configurations
