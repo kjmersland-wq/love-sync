@@ -1,6 +1,5 @@
 // Stubs for legacy real estate data models to prevent Turbopack compilation errors
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { validateStripeConfig } from "./payments/validation";
 
 export interface Country {
   id: string;
@@ -478,8 +477,19 @@ export const db = {
       // 2. Upsert into subscriptions history table
       if (data.stripeSubscriptionId) {
         try {
-          const config = validateStripeConfig();
-          const yearlyPriceId = config.values.yearlyPriceId;
+          // Resolved locally (rather than importing the Stripe config validator) so this
+          // server-only lookup never pulls Stripe secret env var names into client bundles
+          // that import db.ts for its localStorage-backed helpers.
+          let billingEnv: Record<string, any> = process.env;
+          try {
+            const context = getCloudflareContext();
+            if (context && context.env) {
+              billingEnv = { ...process.env, ...context.env };
+            }
+          } catch (e) {
+            // Suppress warning during static building / SSR outside Workers
+          }
+          const yearlyPriceId = (billingEnv.STRIPE_YEARLY_PRICE_ID || billingEnv.NEXT_PUBLIC_STRIPE_YEARLY_PRICE_ID || "").toString().trim();
           const billingPeriod = data.stripePlanId === yearlyPriceId ? "yearly" : "monthly";
           const cancelledAt = (data.stripeBillingStatus === "canceled" || data.stripeBillingStatus === "cancelled" || data.stripeBillingStatus === "unpaid")
             ? new Date().toISOString()

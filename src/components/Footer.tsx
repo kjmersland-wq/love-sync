@@ -93,7 +93,7 @@ export default function Footer() {
           >
             Cookie Policy
           </a>
-          <Link href={`/${locale}/help#contact`} className="hover:text-foreground transition-colors">Contact</Link>
+          <Link href={`/${locale}/contact`} className="hover:text-foreground transition-colors">Contact</Link>
         </nav>
 
         {/* Attribution, Company Info and Contact Links */}

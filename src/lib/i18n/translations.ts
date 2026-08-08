@@ -139,6 +139,10 @@ export const en = {
     ctaSubscribe: "Upgrade to Premium",
     securePayment: "Secure Payment via Stripe"
   },
+  contact: {
+    title: "Get in Touch",
+    subtitle: "Questions about Premium, partnerships, or anything else? Send us a message and our team will get back to you shortly."
+  },
   admin: {
     title: "Love Sync Command Center",
     subtitle: "Operational analytics, moderation reports, and database statistics.",
@@ -350,6 +354,10 @@ export const no: TranslationsDictionary = {
     ctaSubscribe: "Oppgrader til Premium",
     securePayment: "Sikker betaling via Stripe"
   },
+  contact: {
+    title: "Ta kontakt",
+    subtitle: "Spørsmål om Premium, samarbeid eller noe annet? Send oss en melding, så svarer teamet vårt deg raskt."
+  },
   admin: {
     title: "Love Sync Kontrollsenter",
     subtitle: "Driftsanalyse, modereringsrapporter og databasestatistikk.",
@@ -560,6 +568,10 @@ export const pl: TranslationsDictionary = {
     ],
     ctaSubscribe: "Przejdź na Premium",
     securePayment: "Bezpieczna płatność przez Stripe"
+  },
+  contact: {
+    title: "Skontaktuj się z nami",
+    subtitle: "Masz pytania dotyczące Premium, współpracy lub czegoś innego? Napisz do nas, a nasz zespół szybko odpowie."
   },
   admin: {
     title: "Centrum Zarządzania Love Sync",
