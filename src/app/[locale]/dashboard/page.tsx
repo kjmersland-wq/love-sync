@@ -245,6 +245,15 @@ export default function Dashboard() {
         {/* Right Side: Profiles List */}
         <div className="lg:col-span-8">
           
+          {userProfile.isDemoMode && (
+            <div className="bg-secondary/20 border border-border/40 rounded-2xl p-5 mb-6 text-xs text-muted-foreground space-y-2 leading-relaxed">
+              <h3 className="font-bold text-foreground font-mono flex items-center gap-1.5">
+                {t('demo.bannerTitle')}
+              </h3>
+              <p className="font-light">{t('demo.bannerText')}</p>
+            </div>
+          )}
+
           <h2 className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider font-mono">
             {t('dashboard.matchesFound')} ({matches.length})
           </h2>
@@ -382,7 +391,7 @@ export default function Dashboard() {
                     dangerouslySetInnerHTML={{ __html: selectedProfile.image }}
                   />
                   <div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <h2 className="font-serif text-2xl font-bold text-foreground">{selectedProfile.name}</h2>
                       <span className="text-muted-foreground text-lg">{selectedProfile.age}</span>
                       
@@ -390,6 +399,12 @@ export default function Dashboard() {
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-500 text-[10px] font-semibold border border-blue-500/20">
                           <Shield className="h-2.5 w-2.5 fill-current" />
                           <span>{t('profile.verifiedBadge')}</span>
+                        </span>
+                      )}
+
+                      {userProfile.isDemoMode && (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-500 text-[10px] font-semibold border border-amber-500/20">
+                          <span>{t('demo.profileBadge')}</span>
                         </span>
                       )}
                     </div>
@@ -507,27 +522,35 @@ export default function Dashboard() {
                 </div>
 
                 {/* Footer Drawer Action buttons */}
-                <div className="border-t border-border/40 pt-6 flex gap-3">
-                  <button
-                    onClick={() => handleOpenChat(selectedProfile.id)}
-                    className="flex-1 py-3 px-4 bg-foreground text-background hover:bg-foreground/90 transition-all font-semibold rounded-xl text-center flex items-center justify-center gap-2 shadow-lg"
-                  >
-                    <MessageSquare className="h-4.5 w-4.5" />
-                    <span>{t('dashboard.chatNow')}</span>
-                  </button>
+                <div className="border-t border-border/40 pt-6 flex flex-col gap-4">
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => handleOpenChat(selectedProfile.id)}
+                      className="flex-1 py-3 px-4 bg-foreground text-background hover:bg-foreground/90 transition-all font-semibold rounded-xl text-center flex items-center justify-center gap-2 shadow-lg"
+                    >
+                      <MessageSquare className="h-4.5 w-4.5" />
+                      <span>{t('dashboard.chatNow')}</span>
+                    </button>
 
-                  <button
-                    onClick={() => {
-                      toggleSaveProfile(selectedProfile.id);
-                    }}
-                    className={`px-4 py-3 rounded-xl border transition-colors flex items-center justify-center ${
-                      savedProfileIds.includes(selectedProfile.id)
-                        ? 'bg-red-500/10 border-red-500/30 text-red-500'
-                        : 'border-border bg-background hover:bg-secondary text-muted-foreground'
-                    }`}
-                  >
-                    <Heart className={`h-4.5 w-4.5 ${savedProfileIds.includes(selectedProfile.id) ? 'fill-current' : ''}`} />
-                  </button>
+                    <button
+                      onClick={() => {
+                        toggleSaveProfile(selectedProfile.id);
+                      }}
+                      className={`px-4 py-3 rounded-xl border transition-colors flex items-center justify-center ${
+                        savedProfileIds.includes(selectedProfile.id)
+                          ? 'bg-red-500/10 border-red-500/30 text-red-500'
+                          : 'border-border bg-background hover:bg-secondary text-muted-foreground'
+                      }`}
+                    >
+                      <Heart className={`h-4.5 w-4.5 ${savedProfileIds.includes(selectedProfile.id) ? 'fill-current' : ''}`} />
+                    </button>
+                  </div>
+
+                  {userProfile.isDemoMode && (
+                    <p className="text-[10px] text-muted-foreground/60 text-center font-light leading-normal">
+                      {t('demo.profileFooter')}
+                    </p>
+                  )}
                 </div>
 
               </div>

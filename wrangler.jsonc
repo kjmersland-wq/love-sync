@@ -12,12 +12,12 @@
   },
   "vars": {
     "NEXT_PUBLIC_TURNSTILE_SITEKEY": "3x00000000000000000000FF", // Mock testing sitekey
-    "NEXT_PUBLIC_ACTIVE_PAYMENT_PROVIDER": "paddle",
-    "NEXT_PUBLIC_PADDLE_ENVIRONMENT": "production",
-    "NEXT_PUBLIC_PADDLE_CLIENT_TOKEN": "live_a0cf0be4069f975bf53bdb7c002",
-    "PADDLE_MONTHLY_PRICE_ID": "pri_01kz3ez63mzsfc416dyhx8exas",
-    "PADDLE_YEARLY_PRICE_ID": "pri_01kz3f9jx3x3yqzbxz9mgdf8yd",
-    "PADDLE_PRODUCT_ID": "pro_01kz3ejh5rzvt9hf0cy064kjyq",
+    "NEXT_PUBLIC_ACTIVE_PAYMENT_PROVIDER": "stripe",
+    
+    // Stripe public configurations
+    "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY": "pk_live_51U171JDiyajf5i74fsDVlc7knVLZ9mbuuRmj0uubiZnNb5QAz8bNuhLkrbckl7B1g8ypWbPYIcL1cM26QeEo0PMK00fdTfFXnU",
+    "STRIPE_MONTHLY_PRICE_ID": "price_1U17PVDiyajf5i747QaWM6bM",
+    "STRIPE_YEARLY_PRICE_ID": "price_1U17RyDiyajf5i747t4lmoT8",
     
     // Feature Flags default values
     "NEXT_PUBLIC_FEAT_AI_FEATURES": "false",
@@ -27,10 +27,6 @@
     "NEXT_PUBLIC_FEAT_REFERRAL_PROGRAM": "false",
     "NEXT_PUBLIC_FEAT_GIFT_SUBSCRIPTIONS": "false",
     "NEXT_PUBLIC_FEAT_ADVANCED_MATCHING": "true",
-    "NEXT_PUBLIC_FEAT_PAYMENT_STRIPE": "false",
-    "NEXT_PUBLIC_FEAT_PAYMENT_PAYPAL": "false",
-    "NEXT_PUBLIC_FEAT_PAYMENT_MOLLIE": "false",
-    "NEXT_PUBLIC_FEAT_PAYMENT_ADYEN": "false",
-    "NEXT_PUBLIC_FEAT_PAYMENT_CHECKOUT": "false"
+    "NEXT_PUBLIC_FEAT_PAYMENT_STRIPE": "true"
   }
 }

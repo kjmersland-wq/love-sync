@@ -10,10 +10,6 @@ export type FeatureKey =
   | 'giftSubscriptions'
   | 'advancedMatching'
   | 'paymentStripe'
-  | 'paymentPaypal'
-  | 'paymentMollie'
-  | 'paymentAdyen'
-  | 'paymentCheckout'
   | 'experimental';
 
 class FeatureFlagsService {
@@ -25,11 +21,7 @@ class FeatureFlagsService {
     referralProgram: false,     // User invite programs (disabled for launch)
     giftSubscriptions: false,   // Billed subscription gifting (disabled for launch)
     advancedMatching: true,     // Weighted compatibility metrics
-    paymentStripe: false,       // Stripe integration (Paddle Billing is primary)
-    paymentPaypal: false,       // PayPal integration
-    paymentMollie: false,       // Mollie integration
-    paymentAdyen: false,        // Adyen integration
-    paymentCheckout: false,     // Checkout.com integration
+    paymentStripe: true,        // Stripe integration is now active and primary
     experimental: false
   };
 

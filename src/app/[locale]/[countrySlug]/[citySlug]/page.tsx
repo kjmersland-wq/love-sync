@@ -29,9 +29,7 @@ export default function CityPortal({ params }: PageProps) {
     userProfile
   } = useApp();
 
-  if (userProfile.subscription !== 'Premium') {
-    return <PremiumLockOverlay featureKey="relocation" />;
-  }
+
 
   const [city, setCity] = useState<City | null>(null);
   const [loading, setLoading] = useState(true);
@@ -55,6 +53,10 @@ export default function CityPortal({ params }: PageProps) {
     };
     loadCityData();
   }, [canonicalCityId]);
+
+  if (userProfile.subscription !== 'Premium') {
+    return <PremiumLockOverlay featureKey="relocation" />;
+  }
 
   if (loading) {
     return (

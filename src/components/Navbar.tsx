@@ -53,7 +53,7 @@ export const Navbar: React.FC = () => {
   const handleManageBilling = async () => {
     setBillingLoading(true);
     try {
-      const res = await fetch("/api/paddle/portal");
+      const res = await fetch("/api/stripe/portal");
       if (!res.ok) {
         throw new Error(`HTTP error ${res.status}`);
       }
@@ -63,8 +63,8 @@ export const Navbar: React.FC = () => {
       } catch (e) {
         throw new Error("Invalid JSON");
       }
-      if (data.success && data.portalUrl) {
-        window.open(data.portalUrl, "_blank");
+      if (data.success && data.url) {
+        window.location.href = data.url;
       } else {
         window.location.href = `/${locale}/pricing`;
       }

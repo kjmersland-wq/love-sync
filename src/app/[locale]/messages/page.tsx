@@ -34,9 +34,7 @@ export default function Messages() {
     userProfile
   } = useApp();
 
-  if (userProfile.subscription !== 'Premium') {
-    return <PremiumLockOverlay featureKey="messages" />;
-  }
+
 
   const [inputText, setInputText] = useState('');
   const [activeTab, setActiveTab] = useState<'chat' | 'journey' | 'planning' | 'analytics' | 'media' | 'safety'>('chat');
@@ -65,7 +63,9 @@ export default function Messages() {
       }
     }
   }, [activeChatId, currentMessages]);
-
+  if (userProfile.subscription !== 'Premium') {
+    return <PremiumLockOverlay featureKey="messages" />;
+  }
   const handleSend = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!inputText.trim() || !activeChatId) return;

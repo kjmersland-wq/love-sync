@@ -137,7 +137,7 @@ export const en = {
       "Cancel at any time with one click"
     ],
     ctaSubscribe: "Upgrade to Premium",
-    securePayment: "Secure Payment via Paddle"
+    securePayment: "Secure Payment via Stripe"
   },
   admin: {
     title: "Love Sync Command Center",
@@ -201,6 +201,12 @@ export const en = {
     cookiesBody: "Cookie Policy: Only strict session authentication cookies are active (e.g. ls_user_id). Zero advertising pixels, zero behavioral targeting cookies.",
     accountTitle: "Secure Account Status",
     accountBody: "Profile credentials verified. Premium membership status is active. All communications and photo exchanges are protected by edge-level cryptographic token gates."
+  },
+  demo: {
+    bannerTitle: "✨ Interactive Demo",
+    bannerText: "The profiles shown below are fictional demonstration profiles created exclusively to showcase Love Sync's AI Matching Engine, compatibility scoring and Premium experience. No real people are displayed in this demonstration. When Love Sync launches, all matches, compatibility scores and recommendations will be generated from verified members in real time.",
+    profileBadge: "Demo Profile",
+    profileFooter: "This profile is part of the Love Sync interactive demonstration and does not represent a real member."
   }
 };
 
@@ -342,7 +348,7 @@ export const no: TranslationsDictionary = {
       "Avslutt når som helst med ett klikk"
     ],
     ctaSubscribe: "Oppgrader til Premium",
-    securePayment: "Sikker betaling via Paddle"
+    securePayment: "Sikker betaling via Stripe"
   },
   admin: {
     title: "Love Sync Kontrollsenter",
@@ -406,6 +412,12 @@ export const no: TranslationsDictionary = {
     cookiesBody: "Informasjonskapsler: Kun nødvendige økt-kapsler (ls_user_id) brukes for pålogging. Ingen sporingspiksler eller markedsføringskapsler brukes.",
     accountTitle: "Sikker kontostatus",
     accountBody: "Kontoen din er aktiv og verifisert. Premium-tilgang gir deg full adgang til alle funksjoner, beskyttet av kryptografiske porter på Edge-nivå."
+  },
+  demo: {
+    bannerTitle: "✨ Interaktiv demo",
+    bannerText: "Profilene som vises nedenfor er fiktive demonstrasjonsprofiler opprettet utelukkende for å vise frem Love Syncs AI-matchingsmotor, kompatibilitetsberegning og Premium-opplevelse. Ingen ekte personer vises i denne demonstrasjonen. Når Love Sync lanseres, vil alle matcher, kompatibilitetspoeng og anbefalinger bli generert fra verifiserte medlemmer i sanntid.",
+    profileBadge: "Demoprofil",
+    profileFooter: "Denne profilen er en del av Love Syncs interaktive demonstrasjon og representerer ikke et ekte medlem."
   }
 };
 
@@ -547,7 +559,7 @@ export const pl: TranslationsDictionary = {
       "Anuluj w dowolnym momencie jednym kliknięciem"
     ],
     ctaSubscribe: "Przejdź na Premium",
-    securePayment: "Bezpieczna płatność przez Paddle"
+    securePayment: "Bezpieczna płatność przez Stripe"
   },
   admin: {
     title: "Centrum Zarządzania Love Sync",
@@ -611,6 +623,12 @@ export const pl: TranslationsDictionary = {
     cookiesBody: "Pliki Cookies: Używamy tylko niezbędnych plików sesyjnych (ls_user_id). Brak pikseli śledzących i ciasteczek reklamowych.",
     accountTitle: "Bezpieczny Status Konta",
     accountBody: "Twoje konto jest aktywne i zweryfikowane. Subskrypcja Premium zapewnia pełny dostęp do wszystkich portali, zabezpieczony szyfrowaniem na poziomie Edge."
+  },
+  demo: {
+    bannerTitle: "✨ Interaktywne Demo",
+    bannerText: "Profile wyświetlane poniżej są fikcyjnymi profilami demonstracyjnymi, stworzonymi wyłącznie w celu zaprezentowania silnika dopasowań AI Love Sync, oceny kompatybilności oraz funkcjonalności konta Premium. W tej prezentacji nie są wyświetlane wizerunki prawdziwych osób. Po oficjalnym uruchomieniu Love Sync wszystkie dopasowania, oceny kompatybilności i rekomendacje będą generowane na żywo na podstawie profili zweryfikowanych członków.",
+    profileBadge: "Profil Demo",
+    profileFooter: "Ten profil jest częścią interaktywnej prezentacji Love Sync i nie przedstawia prawdziwego użytkownika."
   }
 };
 
@@ -620,23 +638,47 @@ type TranslationsDictionary = typeof en;
 export const de: TranslationsDictionary = {
   ...en,
   nav: { ...en.nav, brandName: "Love Sync", exploreMatches: "Matches finden", messages: "Nachrichten", pricing: "Premium", verify: "Identität verifizieren", admin: "Admin", themeLight: "Hellmodus", themeDark: "Dunkelmodus" },
-  landing: { ...en.landing, heroTitle: "Echte Beziehungen. Auf Kompatibilität gebaut.", heroSub: "Entdecken Sie bedeutungsvolle Beziehungen durch intelligentes Matching, verifizierte Identitäten und durchdachte Technologie.", ctaStart: "Reise starten", ctaLearn: "Wie es funktioniert" }
+  landing: { ...en.landing, heroTitle: "Echte Beziehungen. Auf Kompatibilität gebaut.", heroSub: "Entdecken Sie bedeutungsvolle Beziehungen durch intelligentes Matching, verifizierte Identitäten und durchdachte Technologie.", ctaStart: "Reise starten", ctaLearn: "Wie es funktioniert" },
+  demo: {
+    bannerTitle: "✨ Interaktive Demo",
+    bannerText: "Die unten angezeigten Profile sind fiktive Demonstrationsprofile, die ausschließlich erstellt wurden, um die AI-Matching-Engine, die Kompatibilitätsbewertung und das Premium-Erlebnis von Love Sync zu zeigen. In dieser Demonstration werden keine realen Personen dargestellt. Nach dem Start von Love Sync werden alle Matches, Kompatibilitätswerte und Empfehlungen in Echtzeit von verifizierten Mitgliedern generiert.",
+    profileBadge: "Demo-Profil",
+    profileFooter: "Dieses Profil ist Teil der interaktiven Demonstration von Love Sync und stellt kein reales Mitglied dar."
+  }
 };
 
 export const fr: TranslationsDictionary = {
   ...en,
   nav: { ...en.nav, brandName: "Love Sync", exploreMatches: "Trouver des profils", messages: "Messages", pricing: "Premium", verify: "Vérifier ID", admin: "Admin", themeLight: "Mode clair", themeDark: "Mode sombre" },
-  landing: { ...en.landing, heroTitle: "De vraies relations. Basées sur la compatibilité.", heroSub: "Découvrez des relations significatives grâce à un ciblage intelligent, des profils vérifiés et une technologie éthique.", ctaStart: "Commencer votre voyage", ctaLearn: "Comment ça marche" }
+  landing: { ...en.landing, heroTitle: "De vraies relations. Basées sur la compatibilité.", heroSub: "Découvrez des relations significatives grâce à un ciblage intelligent, des profils vérifiés et une technologie éthique.", ctaStart: "Commencer votre voyage", ctaLearn: "Comment ça marche" },
+  demo: {
+    bannerTitle: "✨ Démo interactive",
+    bannerText: "Les profils affichés ci-dessous sont des profils de démonstration fictifs créés exclusivement pour présenter le moteur de ciblage IA de Love Sync, le calcul de compatibilité et l'expérience Premium. Aucune personne réelle n'est représentée dans cette démonstration. Lors du lancement de Love Sync, tous les profils suggérés, scores de compatibilité et recommandations seront générés en temps réel à partir de membres vérifiés.",
+    profileBadge: "Profil de démo",
+    profileFooter: "Ce profil fait partie de la démonstration interactive de Love Sync et ne représente pas un membre réel."
+  }
 };
 
 export const es: TranslationsDictionary = {
   ...en,
   nav: { ...en.nav, brandName: "Love Sync", exploreMatches: "Buscar Parejas", messages: "Mensajes", pricing: "Premium", verify: "Verificar ID", admin: "Admin", themeLight: "Modo Claro", themeDark: "Modo Oscuro" },
-  landing: { ...en.landing, heroTitle: "Relaciones Reales. Basadas en la Compatibilidad.", heroSub: "Descubra conexiones significativas mediante emparejamiento inteligente, identidades verificadas y tecnología respetuosa.", ctaStart: "Comience Su Viaje", ctaLearn: "Cómo Funciona" }
+  landing: { ...en.landing, heroTitle: "Relaciones Reales. Basadas en la Compatibilidad.", heroSub: "Descubra conexiones significativas mediante emparejamiento inteligente, identidades verificadas y tecnología respetuosa.", ctaStart: "Comience Su Viaje", ctaLearn: "Cómo Funciona" },
+  demo: {
+    bannerTitle: "✨ Demostración Interactiva",
+    bannerText: "Los perfiles mostrados a continuación son perfiles de demostración ficticios creados exclusivamente para exhibir el motor de emparejamiento por IA de Love Sync, el cálculo de compatibilidad y la experiencia Premium. No se muestran personas reales en esta demostración. Cuando se lance Love Sync, todas las parejas sugeridas, puntuaciones de compatibilidad y recomendaciones se generarán en tiempo real a partir de miembros verificados.",
+    profileBadge: "Perfil de Demo",
+    profileFooter: "Este perfil forma parte de la demostración interactiva de Love Sync y no representa a un miembro real."
+  }
 };
 
 export const it: TranslationsDictionary = {
   ...en,
   nav: { ...en.nav, brandName: "Love Sync", exploreMatches: "Trova Match", messages: "Messaggi", pricing: "Premium", verify: "Verifica ID", admin: "Admin", themeLight: "Modalità Chiara", themeDark: "Modalità Scura" },
-  landing: { ...en.landing, heroTitle: "Relazioni Vere. Costruite sulla Compatibilità.", heroSub: "Scopri connessioni significative attraverso un matching intelligente, identità verificate e tecnologia consapevole.", ctaStart: "Inizia il Tuo Viaggio", ctaLearn: "Come Funziona" }
+  landing: { ...en.landing, heroTitle: "Relazioni Vere. Costruite sulla Compatibilità.", heroSub: "Scopri connessioni significative attraverso un matching intelligente, identità verificate e tecnologia consapevole.", ctaStart: "Inizia il Tuo Viaggio", ctaLearn: "Come Funziona" },
+  demo: {
+    bannerTitle: "✨ Demo Interattiva",
+    bannerText: "I profili mostrati di seguito sono profili dimostrativi fittizi creati esclusivamente per mostrare il motore di matching AI di Love Sync, il calcolo della compatibilità e l'esperienza Premium. Nessuna persona reale è rappresentata in questa dimostrazione. Al lancio di Love Sync, tutti i match, i punteggi di compatibilità e le raccomandazioni saranno generati in tempo reale da membri verificati.",
+    profileBadge: "Profilo Demo",
+    profileFooter: "Questo profilo fa parte della dimostrazione interattiva di Love Sync e non rappresenta un membro reale."
+  }
 };

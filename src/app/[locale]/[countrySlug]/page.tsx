@@ -20,9 +20,7 @@ export default function CountryPortal({ params }: PageProps) {
   const { countrySlug } = use(params);
   const { userProfile } = useApp();
   
-  if (userProfile.subscription !== 'Premium') {
-    return <PremiumLockOverlay featureKey="relocation" />;
-  }
+
 
   const [country, setCountry] = useState<Country | null>(null);
   const [cities, setCities] = useState<City[]>([]);
@@ -43,6 +41,10 @@ export default function CountryPortal({ params }: PageProps) {
     };
     loadCountryData();
   }, [canonicalCountryId]);
+
+  if (userProfile.subscription !== 'Premium') {
+    return <PremiumLockOverlay featureKey="relocation" />;
+  }
 
   if (loading) {
     return (

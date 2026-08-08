@@ -1,6 +1,6 @@
 // Stubs for legacy real estate data models to prevent Turbopack compilation errors
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { validatePaddleConfig } from "./payments/validation";
+import { validateStripeConfig } from "./payments/validation";
 
 export interface Country {
   id: string;
@@ -426,7 +426,7 @@ export const db = {
     return filtered;
   },
 
-  // --- Users & Paddle Billing (D1 with mock/localStorage fallback) ---
+  // --- Users & Stripe Billing (D1 with mock/localStorage fallback) ---
   async getUser(id: string): Promise<any | null> {
     const d1 = getD1();
     if (d1) {
@@ -452,11 +452,11 @@ export const db = {
     id: string,
     data: {
       subscription: "Not Subscribed" | "Premium";
-      paddleCustomerId: string | null;
-      paddleSubscriptionId: string | null;
-      paddleBillingStatus: string | null;
-      paddleRenewalDate: string | null;
-      paddlePlanId: string | null;
+      stripeCustomerId: string | null;
+      stripeSubscriptionId: string | null;
+      stripeBillingStatus: string | null;
+      stripeRenewalDate: string | null;
+      stripePlanId: string | null;
       transactionId?: string | null;
     }
   ): Promise<void> {
@@ -464,25 +464,24 @@ export const db = {
     if (d1) {
       // 1. Update user table
       await d1.prepare(
-        "UPDATE users SET subscription = ?, paddle_customer_id = ?, paddle_subscription_id = ?, paddle_billing_status = ?, paddle_renewal_date = ?, paddle_plan_id = ? WHERE id = ?"
+        "UPDATE users SET subscription = ?, stripe_customer_id = ?, stripe_subscription_id = ?, stripe_billing_status = ?, stripe_renewal_date = ?, stripe_plan_id = ? WHERE id = ?"
       ).bind(
         data.subscription,
-        data.paddleCustomerId,
-        data.paddleSubscriptionId,
-        data.paddleBillingStatus,
-        data.paddleRenewalDate,
-        data.paddlePlanId,
+        data.stripeCustomerId,
+        data.stripeSubscriptionId,
+        data.stripeBillingStatus,
+        data.stripeRenewalDate,
+        data.stripePlanId,
         id
       ).run();
 
       // 2. Upsert into subscriptions history table
-      if (data.paddleSubscriptionId) {
+      if (data.stripeSubscriptionId) {
         try {
-          const config = validatePaddleConfig();
-          const productId = config.values.productId || "pro_default";
+          const config = validateStripeConfig();
           const yearlyPriceId = config.values.yearlyPriceId;
-          const billingPeriod = data.paddlePlanId === yearlyPriceId ? "yearly" : "monthly";
-          const cancelledAt = (data.paddleBillingStatus === "canceled" || data.paddleBillingStatus === "cancelled")
+          const billingPeriod = data.stripePlanId === yearlyPriceId ? "yearly" : "monthly";
+          const cancelledAt = (data.stripeBillingStatus === "canceled" || data.stripeBillingStatus === "cancelled" || data.stripeBillingStatus === "unpaid")
             ? new Date().toISOString()
             : null;
 
@@ -498,15 +497,15 @@ export const db = {
               cancelled_at = excluded.cancelled_at,
               updated_at = CURRENT_TIMESTAMP
           `).bind(
-            data.paddleSubscriptionId,
+            data.stripeSubscriptionId,
             id,
-            data.paddleCustomerId || "",
+            data.stripeCustomerId || "",
             data.transactionId || null,
-            productId,
-            data.paddlePlanId || "",
-            data.paddleBillingStatus || "active",
+            "love_sync_premium",
+            data.stripePlanId || "",
+            data.stripeBillingStatus || "active",
             billingPeriod,
-            data.paddleRenewalDate,
+            data.stripeRenewalDate,
             cancelledAt
           ).run();
         } catch (err) {
@@ -521,11 +520,11 @@ export const db = {
       const updated = {
         ...profile,
         subscription: data.subscription,
-        paddleCustomerId: data.paddleCustomerId,
-        paddleSubscriptionId: data.paddleSubscriptionId,
-        paddleBillingStatus: data.paddleBillingStatus,
-        paddleRenewalDate: data.paddleRenewalDate,
-        paddlePlanId: data.paddlePlanId
+        stripeCustomerId: data.stripeCustomerId,
+        stripeSubscriptionId: data.stripeSubscriptionId,
+        stripeBillingStatus: data.stripeBillingStatus,
+        stripeRenewalDate: data.stripeRenewalDate,
+        stripePlanId: data.stripePlanId
       };
       localStorage.setItem('ls_user_profile', JSON.stringify(updated));
     }
@@ -791,10 +790,29 @@ export const db = {
     if (!user || user.subscription !== "Premium") {
       return false;
     }
-    if (user.paddle_renewal_date) {
-      const renewalDate = new Date(user.paddle_renewal_date);
+    if (user.stripe_renewal_date) {
+      const renewalDate = new Date(user.stripe_renewal_date);
       if (renewalDate.getTime() <= Date.now()) {
         return false;
+      }
+    }
+    return true;
+  },
+
+  async isDemoMode(): Promise<boolean> {
+    const envVal = process.env.DEMO_MODE || process.env.NEXT_PUBLIC_DEMO_MODE;
+    if (envVal !== undefined) {
+      return envVal === 'true';
+    }
+    const d1 = getD1();
+    if (d1) {
+      try {
+        const res = await d1.prepare("SELECT COUNT(*) as count FROM users").first() as { count: number } | null;
+        if (res && res.count > 5) {
+          return false;
+        }
+      } catch (e) {
+        console.error("[isDemoMode DB check failed]", e);
       }
     }
     return true;

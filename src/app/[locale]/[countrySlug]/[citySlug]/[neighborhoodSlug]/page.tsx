@@ -30,9 +30,7 @@ export default function NeighborhoodPortal({ params }: PageProps) {
     userProfile
   } = useApp();
 
-  if (userProfile.subscription !== 'Premium') {
-    return <PremiumLockOverlay featureKey="relocation" />;
-  }
+
 
   const [city, setCity] = useState<City | null>(null);
   const [neighborhood, setNeighborhood] = useState<Neighborhood | null>(null);
@@ -60,6 +58,10 @@ export default function NeighborhoodPortal({ params }: PageProps) {
     };
     loadData();
   }, [canonicalCityId, canonicalNeighborhoodId]);
+
+  if (userProfile.subscription !== 'Premium') {
+    return <PremiumLockOverlay featureKey="relocation" />;
+  }
 
   if (loading) {
     return (

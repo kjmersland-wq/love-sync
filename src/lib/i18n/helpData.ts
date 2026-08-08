@@ -73,13 +73,13 @@ export const helpCategories: HelpCategory[] = [
       it: 'Fatturazione, Sicurezza e Privacy'
     },
     description: {
-      en: 'Manage Paddle subscriptions, learn about ID verifications, and safety tips.',
-      no: 'Administrer Paddle-abonnementer, lær om ID-verifisering og sikkerhetstips.',
-      pl: 'Zarządzanie subskrypcjami Paddle, informacje o weryfikacji tożsamości i bezpieczeństwie.',
-      de: 'Verwalten Sie Paddle-Abonnements, erfahren Sie mehr über ID-Verifizierungen und Sicherheitstipps.',
-      fr: 'Gerez les abonnements Paddle, informez-vous sur les vérifications d\'identité et la sécurité.',
-      es: 'Gestione las suscripciones de Paddle, obtenga información sobre la verificación de identidad y consejos de seguridad.',
-      it: 'Gestisci gli abbonamenti Paddle, scopri le verifiche dell\'ID e i consigli sulla sicurezza.'
+      en: 'Manage Stripe subscriptions, learn about ID verifications, and safety tips.',
+      no: 'Administrer Stripe-abonnementer, lær om ID-verifisering og sikkerhetstips.',
+      pl: 'Zarządzanie subskrypcjami Stripe, informacje o weryfikacji tożsamości i bezpieczeństwie.',
+      de: 'Verwalten Sie Stripe-Abonnements, erfahren Sie mehr über ID-Verifizierungen und Sicherheitstipps.',
+      fr: 'Gerez les abonnements Stripe, informez-vous sur les vérifications d\'identité et la sécurité.',
+      es: 'Gestione las suscripciones de Stripe, obtenga información sobre la verificación de identidad y consejos de seguridad.',
+      it: 'Gestisci gli abbonamenti Stripe, scopri le verifiche dell\'ID e i consigli sulla sicurezza.'
     }
   },
   {
@@ -196,25 +196,25 @@ export const helpArticles: HelpArticle[] = [
     }
   },
   {
-    id: 'paddle-billing',
+    id: 'stripe-billing',
     categoryId: 'billing-safety',
     title: {
-      en: 'Paddle Subscriptions & Receipts',
-      no: 'Paddle-abonnementer og kvitteringer',
-      pl: 'Subskrypcje i Faktury Paddle',
-      de: 'Paddle-Abonnements & Quittungen',
-      fr: 'Abonnements et Factures Paddle',
-      es: 'Suscripciones y Recibos de Paddle',
-      it: 'Abbonamenti e Ricevute Paddle'
+      en: 'Stripe Subscriptions & Receipts',
+      no: 'Stripe-abonnementer og kvitteringer',
+      pl: 'Subskrypcje i Faktury Stripe',
+      de: 'Stripe-Abonnements & Quittungen',
+      fr: 'Abonnements et Factures Stripe',
+      es: 'Suscripciones y Recibos de Stripe',
+      it: 'Abbonamenti e Ricevute Stripe'
     },
     content: {
-      en: 'All payments are securely processed by Paddle, our primary Merchant of Record. Subscriptions renew automatically. You can retrieve invoice histories, update payment methods, or cancel your premium subscription directly in the Billing panel.',
-      no: 'Alle betalinger behandles sikkert av Paddle, vår primære forhandler. Abonnementer fornyes automatisk. Du kan hente fakturahistorikk, oppdatere betalingsmetoder eller avslutte premium-abonnementet direkte i faktureringspanelet.',
-      pl: 'Wszystkie płatności są bezpiecznie obsługiwane przez Paddle, naszego licencjonowanego sprzedawcę (Merchant of Record). Subskrypcje odnawiają się automatycznie. Faktury i historię płatności znajdziesz w panelu premium.',
-      de: 'Alle Zahlungen werden sicher über Paddle abgewickelt. Abonnements verlängern sich automatisch. Sie können den Rechnungsverlauf einsehen, Zahlungsdaten aktualisieren oder Ihr Premium-Abonnement im Dashboard kündigen.',
-      fr: 'Tous les paiements sont sécurisés par Paddle, notre marchand agréé. Les abonnements se renouvellent automatiquement. Vous pouvez consulter l\'historique des factures et résilier votre offre premium depuis la page Facturation.',
-      es: 'Todos los pagos se procesan de forma segura a través de Paddle. Las suscripciones se renuevan automáticamente. Puede recuperar el historial de facturas, actualizar los métodos de pago o cancelar su suscripción premium en el panel.',
-      it: 'Tutti i pagamenti sono elaborati in modo sicuro da Paddle, il nostro Merchant of Record principale. Gli abbonamenti si rinnovano automaticamente. Puoi consultare lo storico delle fatture o annullare l\'abbonamento nel pannello.'
+      en: 'All payments are securely processed by Stripe. Subscriptions renew automatically. You can retrieve invoice histories, update payment methods, or cancel your premium subscription directly in the Billing panel.',
+      no: 'Alle betalinger behandles sikkert av Stripe. Abonnementer fornyes automatisk. Du kan hente fakturahistorikk, oppdatere betalingsmetoder eller avslutte premium-abonnementet direkte i faktureringspanelet.',
+      pl: 'Wszystkie płatności są bezpiecznie obsługiwane przez Stripe. Subskrypcje odnawiają się automatycznie. Faktury i historię płatności znajdziesz w panelu premium.',
+      de: 'Alle Zahlungen werden sicher über Stripe abgewickelt. Abonnements verlängern sich automatisch. Sie können den Rechnungsverlauf einsehen, Zahlungsdaten aktualisieren oder Ihr Premium-Abonnement im Dashboard kündigen.',
+      fr: 'Tous les paiements sont sécurisés par Stripe. Les abonnements se renouvellent automatiquement. Vous pouvez consulter l\'historique des factures et résilier votre offre premium depuis la page Facturation.',
+      es: 'Todos los pagos se procesan de forma segura a través de Stripe. Las suscripciones se renuevan automáticamente. Puede recuperar el historial de facturas, actualizar los métodos de pago o cancelar su suscripción premium en el panel.',
+      it: 'Tutti i pagamenti sono elaborati in modo sicuro da Stripe. Gli abbonamenti si rinnovano automaticamente. Puoi consultare lo storico delle fatture o annullare l\'abbonamento nel pannello.'
     }
   },
   {

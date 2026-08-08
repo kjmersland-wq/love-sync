@@ -10,7 +10,7 @@ import {
   AlertCircle, RefreshCw 
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { initializePaddle, Paddle } from "@paddle/paddle-js";
+
 
 export default function PricingClient() {
   const router = useRouter();
@@ -27,7 +27,6 @@ export default function PricingClient() {
   const [loading, setLoading] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
-  const [paddle, setPaddle] = useState<Paddle | null>(null);
   const [missingConfigKeys, setMissingConfigKeys] = useState<string[]>([]);
   const [priceIds, setPriceIds] = useState<{ monthly: string; yearly: string }>({ monthly: '', yearly: '' });
 
@@ -40,7 +39,7 @@ export default function PricingClient() {
   useEffect(() => {
     const fetchConfig = async () => {
       try {
-        const res = await fetch('/api/paddle/config');
+        const res = await fetch('/api/stripe/config');
         if (res.ok) {
           const data = await res.json();
           if (data.success) {
@@ -50,22 +49,14 @@ export default function PricingClient() {
             });
 
             const missingKeysList = [];
-            if (!data.clientToken) missingKeysList.push('PADDLE_CLIENT_TOKEN');
-            if (!data.monthlyPriceId) missingKeysList.push('PADDLE_MONTHLY_PRICE_ID');
-            if (!data.yearlyPriceId) missingKeysList.push('PADDLE_YEARLY_PRICE_ID');
+            if (!data.publishableKey) missingKeysList.push('STRIPE_PUBLISHABLE_KEY');
+            if (!data.monthlyPriceId) missingKeysList.push('STRIPE_MONTHLY_PRICE_ID');
+            if (!data.yearlyPriceId) missingKeysList.push('STRIPE_YEARLY_PRICE_ID');
             setMissingConfigKeys(missingKeysList);
-
-            if (data.clientToken) {
-              const paddleInstance = await initializePaddle({
-                environment: data.environment || 'sandbox',
-                token: data.clientToken,
-              });
-              if (paddleInstance) setPaddle(paddleInstance);
-            }
           }
         }
       } catch (e) {
-        console.error("Failed to fetch Paddle configuration:", e);
+        console.error("Failed to fetch Stripe configuration:", e);
       }
     };
     fetchConfig();
@@ -82,22 +73,10 @@ export default function PricingClient() {
         throw new Error("Billing plan price ID is not configured on the server.");
       }
 
-      const { transactionId, checkoutUrl } = await upgradeSubscription(planId, amount);
+      const { checkoutUrl } = await upgradeSubscription(planId, amount);
       
-      if (paddle && transactionId) {
-        setLoading(false);
-        paddle.Checkout.open({
-          settings: {
-            displayMode: "overlay",
-            theme: "dark",
-            locale: ["pl", "de", "fr", "es", "it"].includes(locale) ? locale : "en"
-          },
-          transactionId: transactionId
-        });
-      } else {
-        // Fallback to hosted checkout redirect
-        window.location.href = checkoutUrl;
-      }
+      // Redirect to Stripe Checkout hosted checkout
+      window.location.href = checkoutUrl;
     } catch (err) {
       setLoading(false);
       triggerModal("Checkout Initialization Failed", (err as Error).message, "error");
@@ -107,7 +86,7 @@ export default function PricingClient() {
   const handleManageSubscription = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/paddle/portal");
+      const res = await fetch("/api/stripe/portal");
       if (!res.ok) {
         throw new Error(`HTTP error ${res.status}`);
       }
@@ -118,14 +97,14 @@ export default function PricingClient() {
         throw new Error("Invalid response format from billing server");
       }
       setLoading(false);
-      if (data.success && data.portalUrl) {
-        window.open(data.portalUrl, "_blank");
+      if (data.success && data.url) {
+        window.location.href = data.url;
       } else {
         triggerModal("Billing Portal Error", data.error || "Failed to load subscription portal", "error");
       }
     } catch (err) {
       setLoading(false);
-      triggerModal("Redirection Error", "Could not load cross-border billing portal: " + (err as Error).message, "error");
+      triggerModal("Redirection Error", "Could not load Stripe billing portal: " + (err as Error).message, "error");
     }
   };
 
@@ -142,25 +121,11 @@ export default function PricingClient() {
   };
 
   const getProviderBrandName = (): string => {
-    switch (activePaymentProvider) {
-      case 'stripe': return 'Stripe API Gateway';
-      case 'paddle': return 'Paddle Merchant Platform';
-      case 'adyen': return 'Adyen International';
-      case 'mollie': return 'Mollie Local Payments';
-      case 'paypal': return 'PayPal Smart Buttons';
-      case 'checkout': return 'Checkout.com';
-      default: return 'Payment Provider';
-    }
+    return 'Stripe API Gateway';
   };
 
   const getProviderIconColor = (): string => {
-    switch (activePaymentProvider) {
-      case 'stripe': return 'text-indigo-500';
-      case 'paypal': return 'text-blue-500';
-      case 'mollie': return 'text-amber-600';
-      case 'paddle': return 'text-green-500';
-      default: return 'text-rose-500';
-    }
+    return 'text-indigo-500';
   };
 
   return (
@@ -170,7 +135,7 @@ export default function PricingClient() {
         <div className="mb-8 p-4 bg-red-500/10 border border-red-500/30 rounded-2xl text-xs text-red-500 font-semibold flex flex-col gap-1.5 shadow-sm max-w-xl mx-auto text-left">
           <div className="font-bold flex items-center gap-1">
             <AlertCircle className="h-4 w-4" />
-            <span>Developer Configuration Alert: Missing Required Paddle Key(s)</span>
+            <span>Developer Configuration Alert: Missing Required Stripe Key(s)</span>
           </div>
           <p className="text-red-400 font-light leading-relaxed">
             The following environment variables are missing from process.env or Cloudflare context: {missingConfigKeys.join(', ')}. Please register them.
@@ -262,7 +227,7 @@ export default function PricingClient() {
               </h2>
             </div>
             <div className="text-[10px] px-2 py-0.5 bg-secondary text-muted-foreground font-mono rounded border border-border/40">
-              Active Gateway
+              Secure Payment Gateway
             </div>
           </div>
 
@@ -299,160 +264,45 @@ export default function PricingClient() {
               </div>
             </div>
           ) : (
-            <form onSubmit={handleCheckout} className="space-y-4">
-              
-              {/* Conditional UIs based on Active Provider */}
-              
-              {activePaymentProvider === 'paddle' ? (
-                /* Paddle Merchant of Record Overlay Checkout */
-                <div className="space-y-4 py-2">
-                  <div className="bg-green-500/5 dark:bg-green-500/10 border border-green-500/20 rounded-xl p-4 space-y-2 text-xs leading-relaxed font-light">
-                    <div className="flex items-center gap-1.5 font-semibold text-green-500">
-                      <ShieldCheck className="h-4 w-4" />
-                      <span>Paddle Merchant of Record Secure Billing</span>
-                    </div>
-                    <p className="text-muted-foreground">
-                      Paddle handles global taxes, compliance, and multi-currency billing out of the box, ensuring secure checkout and direct digital receipt generation.
-                    </p>
-                  </div>
-                  
-                  {/* Localized Price Calculator Mock */}
-                  <div className="bg-secondary/20 p-4 rounded-xl border border-border/40 space-y-2 text-xs">
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Base Subscription</span>
-                      <span className="font-mono text-foreground">
-                        {billingCycle === 'monthly' ? '$19.00 USD' : '$144.00 USD'}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Localized VAT (Norway 25%)</span>
-                      <span className="font-mono text-foreground">
-                        {billingCycle === 'monthly' ? '$4.75 USD' : '$36.00 USD'}
-                      </span>
-                    </div>
-                    <div className="border-t border-border/40 pt-2 flex justify-between font-semibold">
-                      <span>Total Amount</span>
-                      <span className="font-mono text-foreground">
-                        {billingCycle === 'monthly' ? '$23.75 USD' : '$180.00 USD'}
-                      </span>
-                    </div>
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full py-3 rounded-xl bg-foreground text-background font-semibold text-xs hover:bg-foreground/90 disabled:opacity-50 transition-colors flex items-center justify-center gap-2 shadow"
-                  >
-                    {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ExternalLink className="h-4 w-4" />}
-                    <span>Open Paddle checkout overlay</span>
-                  </button>
+            <form onSubmit={handleCheckout} className="space-y-6">
+              <div className="bg-indigo-500/5 dark:bg-indigo-500/10 border border-indigo-500/20 rounded-2xl p-5 space-y-3 text-xs leading-relaxed font-light text-left">
+                <div className="flex items-center gap-1.5 font-semibold text-indigo-500">
+                  <ShieldCheck className="h-4.5 w-4.5" />
+                  <span>Stripe Secure Gateway Billing</span>
                 </div>
-              ) : activePaymentProvider === 'paypal' ? (
-                /* PayPal Smart Buttons Mock */
-                <div className="space-y-4 py-4">
-                  <div className="bg-yellow-500/10 border border-yellow-500/30 text-yellow-600 dark:text-yellow-500 rounded-xl p-4 flex gap-3 text-xs leading-relaxed font-light">
-                    <AlertCircle className="h-4.5 w-4.5 shrink-0" />
-                    <p>Click below to log in to your PayPal account and complete subscription authorization.</p>
-                  </div>
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full bg-[#ffc439] hover:bg-[#f4b82e] text-[#111] font-semibold py-3 rounded-xl flex items-center justify-center gap-2 transition-colors shadow"
-                  >
-                    {loading ? (
-                      <Loader2 className="h-4 w-4 animate-spin text-[#111]" />
-                    ) : (
-                      <span className="italic font-bold text-sm">PayPal Checkout</span>
-                    )}
-                  </button>
+                <p className="text-muted-foreground font-light">
+                  Subscriptions are processed securely via Stripe. Your card details are never stored on our servers. You can easily manage, renew, or cancel your premium subscription, update cards, and download invoices at any time via the Stripe Customer Portal.
+                </p>
+              </div>
+
+              {/* Price Details */}
+              <div className="bg-secondary/20 p-5 rounded-2xl border border-border/40 space-y-2.5 text-xs">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Base Subscription</span>
+                  <span className="font-mono text-foreground font-semibold">
+                    {billingCycle === 'monthly' ? '$14.99 USD' : '$119.00 USD'}
+                  </span>
                 </div>
-              ) : activePaymentProvider === 'mollie' ? (
-                /* Mollie Bank/IDEAL Selector Mock */
-                <div className="space-y-4">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-muted-foreground">Select Local Payment Method</label>
-                    <select
-                      value={selectedBank}
-                      onChange={(e) => setSelectedBank(e.target.value)}
-                      className="w-full bg-background border border-border px-3 py-2.5 text-xs rounded-xl focus:outline-none focus:border-foreground"
-                    >
-                      <option value="iDEAL">iDEAL (Netherlands)</option>
-                      <option value="Bancontact">Bancontact (Belgium)</option>
-                      <option value="Sofort">SOFORT Banking (Germany/Austria)</option>
-                      <option value="CreditCard">Credit Card</option>
-                    </select>
-                  </div>
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full py-3 rounded-xl bg-foreground text-background font-semibold text-xs hover:bg-foreground/90 disabled:opacity-50 transition-colors flex items-center justify-center gap-2 shadow"
-                  >
-                    {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}
-                    <span>Pay with {selectedBank}</span>
-                  </button>
+                <div className="flex justify-between text-muted-foreground/80 font-light">
+                  <span>Processing & Billing Admin</span>
+                  <span>Included</span>
                 </div>
-              ) : (
-                /* Card Input forms for Stripe, Paddle, Adyen, Checkout.com */
-                <div className="space-y-4">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-muted-foreground">Card Number</label>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        required
-                        placeholder="4242 4242 4242 4242"
-                        maxLength={19}
-                        value={cardNumber}
-                        onChange={(e) => setCardNumber(e.target.value.replace(/\s?/g, '').replace(/(\d{4})/g, '$1 ').trim())}
-                        className="w-full bg-background border border-border pl-10 pr-4 py-2.5 text-xs rounded-xl focus:outline-none focus:border-foreground"
-                      />
-                      <CreditCard className="absolute left-3.5 top-3 h-4 w-4 text-muted-foreground/60" />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-muted-foreground">Expiration Date</label>
-                      <input
-                        type="text"
-                        required
-                        placeholder="MM / YY"
-                        maxLength={7}
-                        value={cardExpiry}
-                        onChange={(e) => setCardExpiry(e.target.value)}
-                        className="w-full bg-background border border-border px-4 py-2.5 text-xs rounded-xl focus:outline-none focus:border-foreground text-center"
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-muted-foreground">CVC</label>
-                      <input
-                        type="text"
-                        required
-                        placeholder="123"
-                        maxLength={4}
-                        value={cardCvc}
-                        onChange={(e) => setCardCvc(e.target.value)}
-                        className="w-full bg-background border border-border px-4 py-2.5 text-xs rounded-xl focus:outline-none focus:border-foreground text-center"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 p-3 bg-secondary/15 rounded-xl border border-border/40 text-[10px] text-muted-foreground font-light leading-relaxed">
-                    <Lock className="h-4 w-4 text-muted-foreground shrink-0" />
-                    <span>Card processing is isolated. Payment fields are loaded securely from the {getProviderBrandName()} CDN.</span>
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full py-3 rounded-xl bg-foreground text-background font-semibold text-xs hover:bg-foreground/90 disabled:opacity-50 transition-colors flex items-center justify-center gap-2 shadow"
-                  >
-                    {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}
-                    <span>{t('pricing.ctaSubscribe')}</span>
-                  </button>
+                <div className="border-t border-border/40 pt-2.5 flex justify-between font-bold text-sm">
+                  <span>Total Amount</span>
+                  <span className="font-mono text-foreground">
+                    {billingCycle === 'monthly' ? '$14.99 USD' : '$119.00 USD'}
+                  </span>
                 </div>
-              )}
+              </div>
 
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-rose-500 to-indigo-600 hover:from-rose-600 hover:to-indigo-700 text-white font-bold text-xs disabled:opacity-50 transition-all duration-200 flex items-center justify-center gap-2 shadow-lg"
+              >
+                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ExternalLink className="h-4 w-4" />}
+                <span>Subscribe via Stripe Secure Checkout</span>
+              </button>
             </form>
           )}
 

@@ -30,6 +30,8 @@ export async function GET(request: Request) {
       });
     }
 
+    const isDemoMode = await db.isDemoMode();
+
     return NextResponse.json({
       success: true,
       profile: {
@@ -37,11 +39,12 @@ export async function GET(request: Request) {
         email: user.email,
         name: user.name,
         subscription: user.subscription === 'Free' ? 'Not Subscribed' : user.subscription, // 'Not Subscribed' or 'Premium'
-        paddleCustomerId: user.paddle_customer_id,
-        paddleSubscriptionId: user.paddle_subscription_id,
-        paddleBillingStatus: user.paddle_billing_status,
-        paddleRenewalDate: user.paddle_renewal_date,
-        paddlePlanId: user.paddle_plan_id
+        stripeCustomerId: user.stripe_customer_id,
+        stripeSubscriptionId: user.stripe_subscription_id,
+        stripeBillingStatus: user.stripe_billing_status,
+        stripeRenewalDate: user.stripe_renewal_date,
+        stripePlanId: user.stripe_plan_id,
+        isDemoMode
       }
     });
   } catch (error: any) {

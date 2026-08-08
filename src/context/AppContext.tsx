@@ -37,6 +37,7 @@ interface AppContextType {
     location: string;
     subscription: 'Not Subscribed' | 'Premium';
     verification: VerificationStatus;
+    isDemoMode?: boolean;
   };
   upgradeSubscription: (planId?: string, amount?: number) => Promise<{ transactionId: string; checkoutUrl: string }>;
   cancelActiveSubscription: () => Promise<void>;
@@ -110,13 +111,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     location: string;
     subscription: 'Not Subscribed' | 'Premium';
     verification: VerificationStatus;
+    isDemoMode?: boolean;
   }>({
     name: "Alex",
     age: 30,
     gender: "Male",
     location: "Oslo, Norway",
     subscription: "Not Subscribed",
-    verification: { email: true, phone: false, photo: false, id: false }
+    verification: { email: true, phone: false, photo: false, id: false },
+    isDemoMode: true
   });
 
   const [modalConfig, setModalConfig] = useState<{
@@ -139,7 +142,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setModalConfig({ isOpen: true, title, description, type });
   };
 
-  const [activePaymentProvider, setActivePaymentProviderState] = useState<PaymentProviderName>('paddle');
+  const [activePaymentProvider, setActivePaymentProviderState] = useState<PaymentProviderName>('stripe');
   const [invoices, setInvoices] = useState<Invoice[]>([]);
 
   // Weights that default to summing to 100
@@ -201,7 +204,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 gender: data.profile.gender || "Male",
                 location: data.profile.location || "Oslo, Norway",
                 subscription: data.profile.subscription || "Not Subscribed",
-                verification: { email: true, phone: false, photo: false, id: false }
+                verification: { email: true, phone: false, photo: false, id: false },
+                isDemoMode: data.profile.isDemoMode !== false
               };
               setUserProfile(syncedProfile);
               localStorage.setItem('ls_user_profile', JSON.stringify(syncedProfile));
@@ -217,7 +221,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const storedProvider = localStorage.getItem('ls_active_payment_provider') as PaymentProviderName | null;
       if (storedProvider) {
         setActivePaymentProviderState(storedProvider);
-        paymentService.setActiveProvider(storedProvider);
       }
 
       // Weights
@@ -238,7 +241,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     const loadInvoices = async () => {
       try {
-        const res = await fetch("/api/paddle/invoices");
+        const res = await fetch("/api/stripe/invoices");
         if (res.ok) {
           const data = await res.json();
           if (data.success) {
@@ -268,7 +271,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const setActivePaymentProvider = (provider: PaymentProviderName) => {
     setActivePaymentProviderState(provider);
-    paymentService.setActiveProvider(provider);
     localStorage.setItem('ls_active_payment_provider', provider);
   };
 
@@ -277,7 +279,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     planId: string = "monthly_plan",
     amount: number = 14.99
   ): Promise<{ transactionId: string; checkoutUrl: string }> => {
-    const res = await fetch("/api/paddle/checkout", {
+    const res = await fetch("/api/stripe/checkout", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ planId, amount })
@@ -306,7 +308,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const cancelActiveSubscription = async () => {
-    const res = await fetch("/api/paddle/cancel", { method: "POST" });
+    const res = await fetch("/api/stripe/cancel", { method: "POST" });
     if (!res.ok) {
       throw new Error(`HTTP error ${res.status}: Failed to cancel subscription`);
     }
@@ -338,123 +340,39 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Mock Webhook Generator - demonstrates business logic isolation from webhooks!
   const generateMockWebhook = (type: WebhookEventType) => {
-    // Generate event ID (held constant for testing idempotency double-dispatch)
-    const eventId = `evt_webhook_test_99999`;
+    // Execute local business logic changes directly for mock testing
+    if (type === 'subscription.created' || type === 'subscription.renewed') {
+      setUserProfile(prev => {
+        const nextProfile = { ...prev, subscription: 'Premium' as const };
+        localStorage.setItem('ls_user_profile', JSON.stringify(nextProfile));
+        return nextProfile;
+      });
 
-    const mockHeaders: Record<string, string> = {
-      'content-type': 'application/json',
-      'stripe-signature': 'mock_signature_from_cloudflare_waf',
-      'paddle-signature': 't=1610000000;h1=sandbox_bypass' // Matches Web Crypto sandbox bypass rule
-    };
+      // Add a new invoice from the mock webhook
+      const newInvoice: Invoice = {
+        id: `in_stripe_${Math.floor(100000 + Math.random() * 900000)}`,
+        date: new Date().toISOString(),
+        amount: type === 'subscription.created' ? 14.99 : 119.00,
+        currency: 'USD',
+        status: 'paid',
+        pdfUrl: 'https://stripe.com/mock-receipt.pdf',
+        provider: 'stripe'
+      };
 
-    // Construct mock raw JSON payloads depending on the active provider
-    let mockPayload: any = {};
-    if (activePaymentProvider === 'stripe') {
-      mockPayload = {
-        id: eventId,
-        type: type === 'subscription.created' ? 'customer.subscription.created' : 
-              type === 'subscription.renewed' ? 'customer.subscription.updated' : 'customer.subscription.deleted',
-        data: {
-          object: {
-            id: 'sub_stripe_abc123',
-            amount_due: 1900,
-            currency: 'usd',
-            metadata: { userId: 'user_123' }
-          }
-        }
-      };
-    } else if (activePaymentProvider === 'paypal') {
-      mockPayload = {
-        id: eventId,
-        event_type: type === 'subscription.created' ? 'BILLING.SUBSCRIPTION.CREATED' :
-                    type === 'subscription.renewed' ? 'BILLING.SUBSCRIPTION.RENEWED' : 'BILLING.SUBSCRIPTION.CANCELLED',
-        resource: {
-          id: 'I-PAYPALMOCK999',
-          custom_id: 'user_123',
-          amount: { total: '19.00', currency: 'USD' }
-        }
-      };
-    } else if (activePaymentProvider === 'paddle') {
-      // Paddle Billing v2 specific JSON payload format
-      mockPayload = {
-        event_id: eventId,
-        event_type: type === 'subscription.created' ? 'subscription.created' :
-                    type === 'subscription.renewed' ? 'subscription.updated' : 'subscription.canceled',
-        occurred_at: new Date().toISOString(),
-        data: {
-          id: 'sub_paddle_123456',
-          currency_code: 'USD',
-          custom_data: { userId: 'user_123' },
-          items: [
-            {
-              price: {
-                unit_price: '1900' // cents
-              }
-            }
-          ]
-        }
-      };
-    } else {
-      // General fallbacks for mollie, adyen, checkout.com
-      mockPayload = {
-        id: eventId,
-        event: type === 'subscription.created' ? 'subscription_created' :
-               type === 'subscription.renewed' ? 'subscription_renewed' : 'subscription_cancelled',
-        customerId: 'user_123',
-        subscriptionId: `sub_${activePaymentProvider}_xyz`,
-        amount: { value: '19.00', currency: 'EUR' }
-      };
+      setInvoices(prev => [newInvoice, ...prev]);
+    } else if (type === 'subscription.cancelled') {
+      setUserProfile(prev => {
+        const nextProfile = { ...prev, subscription: 'Not Subscribed' as const };
+        localStorage.setItem('ls_user_profile', JSON.stringify(nextProfile));
+        return nextProfile;
+      });
     }
 
-    const rawBody = JSON.stringify(mockPayload);
-
-    // Call provider agnostic handleWebhookEvent!
-    paymentService.handleWebhookEvent(mockHeaders, rawBody, activePaymentProvider)
-      .then(normalizedEvent => {
-        console.log(`[Payment Webhook Normalized] type=${normalizedEvent.type}, user=${normalizedEvent.userId}, provider=${normalizedEvent.provider}`);
-        
-        // Execute local business logic changes based on the isolated event
-        if (normalizedEvent.type === 'subscription.created' || normalizedEvent.type === 'subscription.renewed') {
-          setUserProfile(prev => {
-            const nextProfile = { ...prev, subscription: 'Premium' as const };
-            localStorage.setItem('ls_user_profile', JSON.stringify(nextProfile));
-            return nextProfile;
-          });
-
-          // Add a new invoice from the webhook capture
-          const newInvoice: Invoice = {
-            id: `in_${activePaymentProvider}_${Math.floor(100000 + Math.random() * 900000)}`,
-            date: new Date().toISOString(),
-            amount: normalizedEvent.amount || 19.00,
-            currency: normalizedEvent.currency || 'USD',
-            status: 'paid',
-            pdfUrl: `https://${activePaymentProvider}.com/mock-receipt.pdf`,
-            provider: activePaymentProvider
-          };
-
-          setInvoices(prev => [newInvoice, ...prev]);
-        } else if (normalizedEvent.type === 'subscription.cancelled') {
-          setUserProfile(prev => {
-            const nextProfile = { ...prev, subscription: 'Not Subscribed' as const };
-            localStorage.setItem('ls_user_profile', JSON.stringify(nextProfile));
-            return nextProfile;
-          });
-        }
-
-        setSystemMetrics(prev => ({
-          ...prev,
-          dbOps: prev.dbOps + 1,
-          latency: Math.floor(Math.random() * 6) + 4
-        }));
-      })
-      .catch(err => {
-        console.warn(`[Admin Webhook Simulation Catch] ${err.message}`);
-        triggerModal(
-          "Webhook Event Rejected",
-          `Event simulation rejected by the payments layer logic: ${err.message}`,
-          "warning"
-        );
-      });
+    setSystemMetrics(prev => ({
+      ...prev,
+      dbOps: prev.dbOps + 1,
+      latency: Math.floor(Math.random() * 6) + 4
+    }));
   };
 
   const setVerificationField = (field: keyof VerificationStatus, value: boolean) => {

@@ -46,9 +46,7 @@ function ComparePortal({ locale }: { locale: string }) {
     userProfile
   } = useApp();
 
-  if (userProfile.subscription !== 'Premium') {
-    return <PremiumLockOverlay featureKey="relocation" />;
-  }
+
 
   const [activeTab, setActiveTab] = useState<'properties' | 'cities'>('properties');
   
@@ -106,7 +104,9 @@ function ComparePortal({ locale }: { locale: string }) {
     };
     loadCities();
   }, [selectedCitySlugs]);
-
+  if (userProfile.subscription !== 'Premium') {
+    return <PremiumLockOverlay featureKey="relocation" />;
+  }
   const handleCitySelect = (index: number, slug: string) => {
     setSelectedCitySlugs(prev => {
       const updated = [...prev];

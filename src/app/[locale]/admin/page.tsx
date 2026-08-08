@@ -33,7 +33,7 @@ export default function Admin() {
   const activeReportsCount = reports.filter(r => r.status === 'Pending').length;
   const activeVerificationsCount = verificationsQueue.filter(v => v.status === 'Pending').length;
 
-  const paymentProviders: PaymentProviderName[] = ['stripe', 'paddle', 'adyen', 'mollie', 'paypal', 'checkout'];
+  const paymentProviders: PaymentProviderName[] = ['stripe'];
 
   const handleDispatchWebhook = () => {
     generateMockWebhook(selectedWebhookType);
@@ -86,11 +86,11 @@ export default function Admin() {
         {/* Stat 4 */}
         <div className="bg-card border border-border/60 rounded-2xl p-5 shadow-sm space-y-2">
           <div className="flex justify-between items-center text-muted-foreground">
-            <span className="text-xs font-semibold uppercase tracking-wider font-mono">Active Gateway</span>
+            <span className="text-xs font-semibold uppercase tracking-wider font-mono">Secure Payment Gateway</span>
             <CreditCard className="h-4.5 w-4.5 text-indigo-500" />
           </div>
           <div className="text-lg font-bold text-foreground font-mono uppercase truncate pt-1">{activePaymentProvider}</div>
-          <p className="text-[10px] text-muted-foreground font-light">Provider-agnostic active</p>
+          <p className="text-[10px] text-muted-foreground font-light">Stripe Secure Payments</p>
         </div>
 
       </div>
@@ -268,16 +268,16 @@ export default function Admin() {
           <div className="space-y-8">
             <div className="space-y-3">
               <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider font-mono border-b border-border/40 pb-3">
-                Provider-Agnostic Payment Manager
+                Stripe Secure Payment Manager
               </h2>
               <p className="text-xs text-muted-foreground font-light leading-relaxed">
-                Love Sync's subscription facade abstracts all API operations. Select the active gateway used for client-side checkouts below. Switching occurs instantly with zero code changes.
+                Love Sync's subscription billing system processes all transactions securely via Stripe. All customer invoices, checkout redirects, and portal operations are verified dynamically.
               </p>
             </div>
 
             {/* Provider Switcher Selector */}
             <div className="space-y-3">
-              <h3 className="text-xs font-semibold text-foreground uppercase tracking-wider font-mono">Select Active Payment Provider</h3>
+              <h3 className="text-xs font-semibold text-foreground uppercase tracking-wider font-mono">Select Active Payment Gateway</h3>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
                 {paymentProviders.map(prov => {
                   const isActive = activePaymentProvider === prov;

@@ -47,9 +47,7 @@ function PropertiesSearch({ locale }: { locale: string }) {
     userProfile
   } = useApp();
 
-  if (userProfile.subscription !== 'Premium') {
-    return <PremiumLockOverlay featureKey="relocation" />;
-  }
+
 
   // Load URL queries if any
   const initialCity = searchParams?.get('city') || 'all';
@@ -171,7 +169,9 @@ function PropertiesSearch({ locale }: { locale: string }) {
     appliedBounds,
     initialNeighborhood
   ]);
-
+  if (userProfile.subscription !== 'Premium') {
+    return <PremiumLockOverlay featureKey="relocation" />;
+  }
   const handleMapBoundsChange = (bounds: { sw: [number, number]; ne: [number, number] }) => {
     setCurrentBounds(bounds);
     setHasMovedMap(true);

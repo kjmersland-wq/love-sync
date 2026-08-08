@@ -44,9 +44,7 @@ export default function PropertyDetailsPage({ params }: PageProps) {
     userProfile
   } = useApp();
 
-  if (userProfile.subscription !== 'Premium') {
-    return <PremiumLockOverlay featureKey="relocation" />;
-  }
+
 
   const [property, setProperty] = useState<Property | null>(null);
   const [neighborhood, setNeighborhood] = useState<Neighborhood | null>(null);
@@ -101,6 +99,10 @@ export default function PropertyDetailsPage({ params }: PageProps) {
     };
     loadPropertyData();
   }, [id]);
+
+  if (userProfile.subscription !== 'Premium') {
+    return <PremiumLockOverlay featureKey="relocation" />;
+  }
 
   if (loading) {
     return (

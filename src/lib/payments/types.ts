@@ -1,4 +1,4 @@
-export type PaymentProviderName = 'stripe' | 'paddle' | 'adyen' | 'mollie' | 'paypal' | 'checkout';
+export type PaymentProviderName = 'stripe';
 
 export interface CheckoutSession {
   id: string;
@@ -54,5 +54,5 @@ export interface PaymentProvider {
   
   handleWebhookEvent(headers: Record<string, string>, rawBody: string): Promise<WebhookEvent>;
 
-  getSubscriptionManagementUrls?(subscriptionId: string): Promise<{ updatePaymentMethod: string; cancel: string } | null>;
+  createPortalSession?(userId: string, returnUrl: string): Promise<string>;
 }

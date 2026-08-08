@@ -44,10 +44,10 @@ export async function middleware(request: NextRequest) {
       const d1 = getD1();
       if (d1) {
         try {
-          const user = await d1.prepare("SELECT subscription, paddle_renewal_date FROM users WHERE id = ?").bind(userId).first();
+          const user = await d1.prepare("SELECT subscription, stripe_renewal_date FROM users WHERE id = ?").bind(userId).first();
           if (user && user.subscription === "Premium") {
             // Subscription expiry checking
-            const renewalDateStr = user.paddle_renewal_date;
+            const renewalDateStr = user.stripe_renewal_date;
             if (renewalDateStr) {
               const renewalDate = new Date(renewalDateStr);
               if (renewalDate.getTime() > Date.now()) {
